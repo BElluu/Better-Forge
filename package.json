@@ -1,0 +1,54 @@
+{
+  "name": "better-forge",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Shared modules of the Better products: auth, audit, vault, notifications, backups, configuration as code, MCP, runtime and UI.",
+  "license": "MIT",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=26.10.0"
+  },
+  "scripts": {
+    "build:kit": "node scripts/build-kit.mjs",
+    "build": "npm run build:kit && npm run build -w better-forge-template",
+    "lint": "eslint . --max-warnings=0",
+    "typecheck": "npm run build:kit && tsc -p tsconfig.test.json && tsc --noEmit -p apps/template && tsc --noEmit -p apps/template/web",
+    "test": "npm run build:kit && tsx --test packages/*/test/*.test.ts apps/template/test/*.test.ts && vitest run",
+    "test:coverage": "npm run build:kit && vitest run --coverage",
+    "test:isolation": "npm run build:kit && node scripts/check-isolation.mjs",
+    "test:e2e:template": "playwright test --config apps/template/playwright.config.ts",
+    "build:icons": "node scripts/build-icon-fonts.mjs",
+    "check:icons": "node scripts/build-icon-fonts.mjs --check",
+    "check:packages": "node scripts/check-packages.mjs",
+    "changeset": "changeset",
+    "version": "changeset version && npm install --package-lock-only",
+    "release": "npm run build:kit && changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.29.7",
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "~1.61.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/smtp-server": "^3.5.13",
+    "@vitest/coverage-v8": "^4.1.11",
+    "eslint": "^10.6.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "fontverter": "^2.0.0",
+    "globals": "^17.7.0",
+    "harfbuzzjs": "^1.6.4",
+    "jsdom": "^29.1.1",
+    "material-symbols": "^0.48.1",
+    "publint": "^0.3.12",
+    "smtp-server": "^3.19.16",
+    "tsx": "^4.23.0",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.62.0",
+    "vitest": "^4.1.11"
+  }
+}
