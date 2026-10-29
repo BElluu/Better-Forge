@@ -1,10 +1,23 @@
 {
-  "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "jsx": "react-jsx",
+    "target": "ES2022",
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "strict": true,
+    "exactOptionalPropertyTypes": true,
+    "noUncheckedIndexedAccess": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
     "module": "ESNext",
     "moduleResolution": "bundler",
+    "jsx": "react-jsx",
     "noEmit": true
   },
-  "include": ["src", "../src/shared"]
+  "include": [
+    "src",
+    "../src/shared"
+  ]
 }

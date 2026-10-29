@@ -29,7 +29,7 @@ export default defineConfig({
       },
     },
     {
-      command: `node ../../node_modules/vite/bin/vite.js --config web/vite.config.ts --port ${webPort}`,
+      command: `npx vite --config web/vite.config.ts --port ${webPort}`,
       url: `http://127.0.0.1:${webPort}/`,
       reuseExistingServer: false,
       timeout: 120_000,
