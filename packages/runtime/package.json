@@ -1,6 +1,6 @@
 {
   "name": "@better-forge/runtime",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Application bootstrap: Fastify defaults, health, shutdown, update check, app lock and SSE.",
   "license": "MIT",
   "repository": {
@@ -57,7 +57,7 @@
     "typescript": "^5.7.3"
   },
   "dependencies": {
-    "@better-forge/db": "0.1.0"
+    "@better-forge/db": "0.1.1"
   },
   "engines": {
     "node": ">=26.10.0"

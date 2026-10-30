@@ -1,6 +1,6 @@
 {
   "name": "@better-forge/audit",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Audit log: write, read, entity-type registry and routes.",
   "license": "MIT",
   "repository": {
@@ -45,8 +45,8 @@
     "typescript": "^5.7.3"
   },
   "dependencies": {
-    "@better-forge/contracts": "0.1.0",
-    "@better-forge/db": "0.1.0"
+    "@better-forge/contracts": "0.1.1",
+    "@better-forge/db": "0.1.1"
   },
   "engines": {
     "node": ">=26.10.0"
