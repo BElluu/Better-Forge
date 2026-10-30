@@ -1,18 +1,20 @@
 name: Release
 
-# Every push to main looks for changesets. With some, it opens (or updates) a "Version packages" pull request; merging
-# that pull request publishes every package to npm at the new version and creates the GitHub release.
+# A push to main that carries changesets releases the packages: the job raises the versions, commits "Version packages"
+# to main, publishes every package to npm and creates the GitHub release. A push without changesets does nothing.
+# Quality is checked on the pull request, which the ruleset on main requires, so it is not repeated here.
 #
 # Publishing uses npm trusted publishing: the job proves who it is with an OIDC token, so no npm token is stored.
-# CHANGESETS_TOKEN is a fine-grained token limited to this repository (contents and pull requests: write); a pull
-# request opened with the default token would not start the CI checks, and could not be merged.
+# CHANGESETS_TOKEN is a fine-grained token limited to this repository (contents: write); the ruleset on main lets its
+# owner (a repository admin) push the version commit. The "Version packages" commit itself is skipped, and a release
+# that stopped half way is finished by running this workflow by hand (Actions -> Release -> Run workflow).
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: write
-  pull-requests: write
   id-token: write
 
 concurrency:
@@ -21,6 +23,7 @@ concurrency:
 
 jobs:
   release:
+    if: github.event_name == 'workflow_dispatch' || github.event.head_commit.message != 'Version packages'
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -40,23 +43,31 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Version packages or publish
-        id: changesets
-        uses: changesets/action@v1
-        with:
-          version: npm run version
-          publish: npm run release
-          commit: "Version packages"
-          title: "Version packages"
-          createGithubReleases: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.CHANGESETS_TOKEN }}
+      - name: Raise the versions
+        run: |
+          if ls .changeset/*.md | grep -qv 'README.md'; then
+            npm run version
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add -A
+            git commit -m "Version packages"
+            git push origin HEAD:main
+          else
+            echo "No changesets."
+          fi
+
+      - name: Publish
+        id: publish
+        run: |
+          set -o pipefail
+          npm run release 2>&1 | tee publish.log
+          if grep -q 'New tag:' publish.log; then echo "published=true" >> "$GITHUB_OUTPUT"; fi
+          git push origin --tags
 
       - name: GitHub release
-        if: steps.changesets.outputs.published == 'true'
+        if: steps.publish.outputs.published == 'true'
         env:
           GH_TOKEN: ${{ secrets.CHANGESETS_TOKEN }}
-          PUBLISHED: ${{ steps.changesets.outputs.publishedPackages }}
         run: |
-          version=$(echo "$PUBLISHED" | jq -r '.[0].version')
-          gh release create "v$version" --title "v$version" --generate-notes
+          version=$(node -p "require('./packages/contracts/package.json').version")
+          gh release create "v$version" --target "$(git rev-parse HEAD)" --title "v$version" --generate-notes
