@@ -42,4 +42,4 @@ in [CLAUDE.md](CLAUDE.md) and [CONTRIBUTING.md](CONTRIBUTING.md).
 All packages are released together at one version and depend on each other at exactly that version. The version is
 `0.x`: a breaking change is a minor, anything else a patch, and the API is not promised stable until a second product
 runs on it. Add a [Changeset](https://github.com/changesets/changesets) to a change with `npm run changeset`; releases
-are made by the **Release** workflow when the "Version packages" pull request is merged.
+are made by the **Release** workflow when a pull request with a changeset is merged.

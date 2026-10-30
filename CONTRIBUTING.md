@@ -9,7 +9,7 @@ The rules and the reasons behind them are in [CLAUDE.md](CLAUDE.md). The short v
    does not matter which package the changeset names.
 3. Before opening a pull request: `npm run lint`, `npm run typecheck`, `npm test`, `npm run test:isolation`,
    `npm run check:icons` and `npm run check:packages`. CI runs the same, plus the template in a browser.
-4. Merge. The **Release** workflow opens (or updates) a "Version packages" pull request; merging it publishes to npm.
+4. Merge. With a changeset in it, the **Release** workflow raises the versions, commits "Version packages" to `main` and publishes to npm; without one nothing is released.
 
 ## Trying a change in a product before it is released
 
@@ -23,6 +23,6 @@ copy of React, Fastify and Drizzle.
 - npm: the `@better-forge` organization, with the first release published by hand; then, for each package, *Settings →
   Trusted Publisher → GitHub Actions* (`BElluu` / `Better-Forge` / `release.yml`) and *Require two-factor
   authentication and disallow tokens*.
-- GitHub: Actions may create pull requests (Settings → Actions → General); a fine-grained token for this repository
-  (contents and pull requests: write) as the secret `CHANGESETS_TOKEN`; a ruleset on `main` that requires a pull request
-  and the `quality` check.
+- GitHub: a fine-grained token for this repository (contents: write) as the secret `CHANGESETS_TOKEN`; a ruleset on `main` that
+  requires a pull request, the `quality` check and an up to date branch, with the repository admin as bypass actor so
+  that the Release workflow can push the version commit.

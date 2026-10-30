@@ -32,7 +32,7 @@ Shared modules of the Better products (BetterStatusPage, BetterOnCall, ...), as 
 ## Changes and releases
 
 - Every change to a package that should be released comes with a changeset (`npm run changeset`). All packages are released together at one version (`fixed` in `.changeset/config.json`), and each depends on the others at exactly that version. While the version is `0.x`, a breaking change is a minor and anything else a patch.
-- Pushes to `main` run the **Release** workflow: with changesets it opens a "Version packages" pull request, and merging that pull request publishes every package to npm (trusted publishing, with provenance) and creates the GitHub release. No npm token is stored; `CHANGESETS_TOKEN` is a fine-grained token for this repository, only to let that pull request run CI.
+- CI (`quality`) runs on pull requests only; the ruleset on `main` requires a pull request, the `quality` check and a branch that is up to date with `main`. A push to `main` runs the **Release** workflow: with changesets it raises the versions, commits "Version packages" to `main`, publishes every package to npm (trusted publishing, with provenance) and creates the GitHub release; without changesets it does nothing. So a merged pull request with a changeset is released at once, and the version cannot be taken back: check the changeset before merging. No npm token is stored; `CHANGESETS_TOKEN` is a fine-grained token for this repository that lets the workflow push the version commit (the ruleset has a bypass for the repository admin). A release that stopped half way is finished with Actions → Release → Run workflow.
 - Never `npm unpublish` a released version (its number cannot be reused); `npm deprecate` it and release a fix.
 - Keep each package's README true to its API. Docs for the products that use the modules live in those products.
 - Commits are short and plain ("Add a rate limit to the login route"). No AI attribution: no `Co-Authored-By`, no AI mentions in commits, PRs or comments.
@@ -43,7 +43,7 @@ A change to a module often starts in a product (BetterStatusPage, BetterOnCall).
 
 1. Make the change here, with a changeset and tests; run `npm run lint`, `npm run typecheck`, `npm test`, `npm run test:isolation`.
 2. Try it in the product without publishing: in the product, `npm run kit:local` builds this repository (the folder next to it, or `KIT_DIR`) and copies the built packages into the product's `node_modules/@better-forge/` (`-- --watch` repeats it on every build; `npm ci` undoes it). The copy is used instead of a symlink so that React, Fastify and Drizzle resolve to the product's single copy.
-3. Merge here, merge the "Version packages" pull request, wait for the release.
+3. Merge here (the release follows by itself) and wait for it.
 4. In the product, raise every `@better-forge/*` to the released version (one version for all of them), run the product's checks and commit.
 
 Do not commit `file:` or `link:` dependencies in a product.

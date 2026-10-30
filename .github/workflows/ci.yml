@@ -1,8 +1,8 @@
 name: CI
 
+# Runs on pull requests only: the ruleset on main requires a pull request, and a branch that is up to date with main,
+# so what was checked there is what lands on main.
 on:
-  push:
-    branches: [main]
   pull_request:
 
 permissions:
