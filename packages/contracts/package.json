@@ -1,6 +1,6 @@
 {
   "name": "@better-forge/contracts",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Browser-safe types, core translations and a storage wrapper that never throws.",
   "license": "MIT",
   "repository": {

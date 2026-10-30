@@ -1,6 +1,6 @@
 {
   "name": "@better-forge/notify",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Notification channels, delivery history, retries and alert hygiene.",
   "license": "MIT",
   "repository": {
@@ -37,10 +37,10 @@
   "dependencies": {
     "nodemailer": "^10.0.13",
     "node-cron": "^4.6.0",
-    "@better-forge/audit": "0.1.0",
-    "@better-forge/contracts": "0.1.0",
-    "@better-forge/db": "0.1.0",
-    "@better-forge/vault": "0.1.0"
+    "@better-forge/audit": "0.1.1",
+    "@better-forge/contracts": "0.1.1",
+    "@better-forge/db": "0.1.1",
+    "@better-forge/vault": "0.1.1"
   },
   "peerDependencies": {
     "drizzle-orm": "^0.45.2",

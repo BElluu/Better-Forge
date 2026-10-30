@@ -1,6 +1,6 @@
 {
   "name": "@better-forge/auth",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Users, sessions, 2FA, SSO/OIDC, roles, API tokens and sign-in routes.",
   "license": "MIT",
   "repository": {
@@ -58,9 +58,9 @@
     "@fastify/rate-limit": "^10.3.0"
   },
   "dependencies": {
-    "@better-forge/audit": "0.1.0",
-    "@better-forge/contracts": "0.1.0",
-    "@better-forge/db": "0.1.0"
+    "@better-forge/audit": "0.1.1",
+    "@better-forge/contracts": "0.1.1",
+    "@better-forge/db": "0.1.1"
   },
   "engines": {
     "node": ">=26.10.0"

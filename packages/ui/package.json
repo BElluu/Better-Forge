@@ -1,6 +1,6 @@
 {
   "name": "@better-forge/ui",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "React admin shell, UI components, API client and shared pages.",
   "license": "MIT",
   "repository": {
@@ -63,7 +63,7 @@
     "*.css"
   ],
   "dependencies": {
-    "@better-forge/contracts": "0.1.0"
+    "@better-forge/contracts": "0.1.1"
   },
   "engines": {
     "node": ">=26.10.0"

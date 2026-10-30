@@ -1,6 +1,6 @@
 {
   "name": "@better-forge/config-as-code",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "YAML configuration engine with a registry of object kinds.",
   "license": "MIT",
   "repository": {
@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "yaml": "^2.9.1",
-    "@better-forge/contracts": "0.1.0"
+    "@better-forge/contracts": "0.1.1"
   },
   "engines": {
     "node": ">=26.10.0"

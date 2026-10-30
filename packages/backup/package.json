@@ -1,6 +1,6 @@
 {
   "name": "@better-forge/backup",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Backup, restore, verification, scheduler and CLI.",
   "license": "MIT",
   "repository": {
@@ -48,8 +48,8 @@
   },
   "dependencies": {
     "node-cron": "^4.6.0",
-    "@better-forge/audit": "0.1.0",
-    "@better-forge/db": "0.1.0"
+    "@better-forge/audit": "0.1.1",
+    "@better-forge/db": "0.1.1"
   },
   "engines": {
     "node": ">=26.10.0"

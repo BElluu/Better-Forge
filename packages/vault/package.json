@@ -1,6 +1,6 @@
 {
   "name": "@better-forge/vault",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Local vault crypto, HashiCorp client, secret resolution and vault routes.",
   "license": "MIT",
   "repository": {
@@ -47,8 +47,8 @@
     "undici": "^7.4.0"
   },
   "dependencies": {
-    "@better-forge/contracts": "0.1.0",
-    "@better-forge/db": "0.1.0"
+    "@better-forge/contracts": "0.1.1",
+    "@better-forge/db": "0.1.1"
   },
   "engines": {
     "node": ">=26.10.0"
