@@ -3,6 +3,7 @@ import { api } from '../api/client'
 import { ConfirmModal } from '../components/ConfirmModal'
 import { Alert, EmptyState, EmptyStateLink, ErrorState, LoadingState, PageContainer, PageHeader, Switch } from '../components/ui'
 import { formatDateTime } from '../lib/dateFormat'
+import { uiText } from '../config'
 
 interface BackupInfo { filename: string; size: number; createdAt: number }
 interface BackupConfig { enabled: boolean; frequency: 'daily' | 'weekly'; hour: number; minute: number; weekday: number; retention: number }
@@ -58,9 +59,9 @@ export default function BackupsPage() {
     } catch (e) { setDeleteTarget(null); setMessage({ tone: 'error', text: errorText(e) }) } finally { setBusy(null) }
   }
 
-  const header = <PageHeader title="Backups" subtitle="Create, download, validate and schedule complete application backups." />
+  const header = <PageHeader title={uiText('Backups')} subtitle="Create, download, validate and schedule complete application backups." />
   if (!state && loadError) return <PageContainer>{header}<ErrorState message={loadError} onRetry={() => void load()} /></PageContainer>
-  if (!state) return <PageContainer>{header}<LoadingState label="Loading backups…" /></PageContainer>
+  if (!state) return <PageContainer>{header}<LoadingState label={uiText('Loading backups…')} /></PageContainer>
   const config = state.config
   const scheduleChanged = JSON.stringify(config) !== JSON.stringify(savedConfig)
   const scheduleSummary = config.enabled
@@ -80,27 +81,27 @@ export default function BackupsPage() {
       <div className="flex flex-wrap gap-3">
         <button type="button" disabled={busy !== null} onClick={create} className="btn btn-primary">{busy === 'create' ? 'Creating backup…' : 'Create backup'}</button>
         <button type="button" disabled={busy !== null} onClick={() => file.current?.click()} className="btn btn-secondary">{busy === 'validate' ? 'Validating…' : 'Validate restore file'}</button>
-        <input ref={file} className="hidden" type="file" accept=".backup" aria-label="Restore file" onChange={(e) => { const selected = e.target.files?.[0]; if (selected) void validate(selected) }} />
+        <input ref={file} className="hidden" type="file" accept=".backup" aria-label={uiText('Restore file')} onChange={(e) => { const selected = e.target.files?.[0]; if (selected) void validate(selected) }} />
       </div>
-      <p className="text-sm" style={{ color: 'var(--m3-secondary)' }}>Restore is intentionally offline. The encryption key is never included; keep VAULT_ENCRYPTION_KEY separately.</p>
+      <p className="text-sm" style={{ color: 'var(--m3-secondary)' }}>{uiText('Restore is intentionally offline. The encryption key is never included; keep VAULT_ENCRYPTION_KEY separately.')}</p>
     </section>
     <section className="rounded-2xl overflow-hidden" style={{ background: 'var(--m3-surface-container-lowest)', border: '1px solid var(--m3-outline-variant)', color: 'var(--m3-on-surface)' }}>
       <div className="p-5 md:p-6 flex items-start justify-between gap-5">
         <div className="flex gap-4 min-w-0">
           <span className="material-symbols-outlined rounded-xl p-2.5 h-fit" aria-hidden="true" style={{ background: 'var(--admin-icon-container)', color: 'var(--admin-icon-color)' }}>schedule</span>
           <div>
-            <h2 className="font-headline text-xl font-semibold">Automatic backups</h2>
+            <h2 className="font-headline text-xl font-semibold">{uiText('Automatic backups')}</h2>
             <p className="text-sm mt-1" style={{ color: 'var(--m3-secondary)' }}>Create backups on a recurring schedule using the server&apos;s local time.</p>
           </div>
         </div>
-        <Switch id={scheduleSwitchId} checked={config.enabled} onChange={(enabled) => updateConfig({ enabled })} aria-label="Automatic backups" />
+        <Switch id={scheduleSwitchId} checked={config.enabled} onChange={(enabled) => updateConfig({ enabled })} aria-label={uiText('Automatic backups')} />
       </div>
 
       <div className="px-5 pb-5 md:px-6 md:pb-6">
         {config.enabled ? (
           <div className="rounded-2xl p-4 md:p-5 grid gap-5 md:grid-cols-3" style={{ background: 'var(--m3-surface-container-low)' }}>
             <fieldset>
-              <legend className="font-mono text-xs uppercase tracking-wider mb-2" style={{ color: 'var(--m3-secondary)' }}>Frequency</legend>
+              <legend className="font-mono text-xs uppercase tracking-wider mb-2" style={{ color: 'var(--m3-secondary)' }}>{uiText('Frequency')}</legend>
               <div className="grid grid-cols-2 rounded-xl overflow-hidden" style={{ border: '1px solid var(--m3-outline-variant)' }}>
                 {(['daily', 'weekly'] as const).map((frequency) => {
                   const active = config.frequency === frequency
@@ -121,50 +122,50 @@ export default function BackupsPage() {
             </fieldset>
 
             {config.frequency === 'weekly' && <label>
-              <span className="block font-mono text-xs uppercase tracking-wider mb-2" style={{ color: 'var(--m3-secondary)' }}>Day of week</span>
+              <span className="block font-mono text-xs uppercase tracking-wider mb-2" style={{ color: 'var(--m3-secondary)' }}>{uiText('Day of week')}</span>
               <select className="input-sig w-full" value={config.weekday} onChange={(e) => updateConfig({ weekday: Number(e.target.value) })}>{WEEKDAYS.map((day, index) => <option key={day} value={index}>{day}</option>)}</select>
             </label>}
 
             <label>
-              <span className="block font-mono text-xs uppercase tracking-wider mb-2" style={{ color: 'var(--m3-secondary)' }}>Start time</span>
+              <span className="block font-mono text-xs uppercase tracking-wider mb-2" style={{ color: 'var(--m3-secondary)' }}>{uiText('Start time')}</span>
               <input className="input-sig w-full" type="time" step="60" value={`${String(config.hour).padStart(2, '0')}:${String(config.minute).padStart(2, '0')}`} onChange={(e) => { const parts = e.target.value.split(':'); const hour = Number(parts[0]); const minute = Number(parts[1]); if (parts.length === 2 && Number.isInteger(hour) && Number.isInteger(minute)) updateConfig({ hour, minute }) }} />
-              <span className="block text-xs mt-1.5" style={{ color: 'var(--m3-secondary)' }}>Server local time</span>
+              <span className="block text-xs mt-1.5" style={{ color: 'var(--m3-secondary)' }}>{uiText('Server local time')}</span>
             </label>
 
             <label>
-              <span className="block font-mono text-xs uppercase tracking-wider mb-2" style={{ color: 'var(--m3-secondary)' }}>Retention</span>
+              <span className="block font-mono text-xs uppercase tracking-wider mb-2" style={{ color: 'var(--m3-secondary)' }}>{uiText('Retention')}</span>
               <div className="relative"><input className="input-sig w-full pr-24" type="number" min="1" max="365" value={config.retention} onChange={(e) => updateConfig({ retention: Number(e.target.value) })} /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm" aria-hidden="true" style={{ color: 'var(--m3-secondary)' }}>backups</span></div>
-              <span className="block text-xs mt-1.5" style={{ color: 'var(--m3-secondary)' }}>Older automatic backups are removed after a successful run.</span>
+              <span className="block text-xs mt-1.5" style={{ color: 'var(--m3-secondary)' }}>{uiText('Older automatic backups are removed after a successful run.')}</span>
             </label>
           </div>
-        ) : <div className="rounded-xl px-4 py-3 text-sm flex items-center gap-3" style={{ background: 'var(--m3-surface-container-low)', color: 'var(--m3-secondary)' }}><span className="material-symbols-outlined" aria-hidden="true" style={{ fontSize: '20px' }}>info</span>Enable scheduling to configure recurring backups.</div>}
+        ) : <div className="rounded-xl px-4 py-3 text-sm flex items-center gap-3" style={{ background: 'var(--m3-surface-container-low)', color: 'var(--m3-secondary)' }}><span className="material-symbols-outlined" aria-hidden="true" style={{ fontSize: '20px' }}>info</span>{uiText('Enable scheduling to configure recurring backups.')}</div>}
 
         <div className="mt-5 pt-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4" style={{ borderTop: '1px solid var(--m3-outline-variant)' }}>
-          <div><p className="text-xs font-mono uppercase tracking-wider" style={{ color: 'var(--m3-secondary)' }}>Current schedule</p><p className="text-sm font-medium mt-1">{scheduleSummary}</p></div>
+          <div><p className="text-xs font-mono uppercase tracking-wider" style={{ color: 'var(--m3-secondary)' }}>{uiText('Current schedule')}</p><p className="text-sm font-medium mt-1">{scheduleSummary}</p></div>
           <button type="button" disabled={busy !== null || !scheduleChanged} onClick={() => saveConfig(config)} className="btn btn-primary">{busy === 'save' ? 'Saving…' : scheduleChanged ? 'Save schedule' : 'Saved'}</button>
         </div>
       </div>
     </section>
     <section className="rounded-2xl overflow-hidden" style={{ background: 'var(--m3-surface-container-lowest)', color: 'var(--m3-on-surface)' }}>
-      <h2 className="font-headline text-xl font-semibold p-6 pb-3">Available backups</h2>
+      <h2 className="font-headline text-xl font-semibold p-6 pb-3">{uiText('Available backups')}</h2>
       {state.backups.length === 0
         ? <EmptyState
             variant="inset"
             icon="cloud_off"
-            title="No backups yet"
+            title={uiText('No backups yet')}
             description={savedConfig?.enabled
               ? 'Automatic backups are on; the first one will appear here after it runs.'
               : 'Automatic backups are off. The database is not protected until the first backup exists.'}
-            action={config.enabled ? undefined : <EmptyStateLink onClick={enableAutomaticBackups}>Enable automatic backups</EmptyStateLink>}
+            action={config.enabled ? undefined : <EmptyStateLink onClick={enableAutomaticBackups}>{uiText('Enable automatic backups')}</EmptyStateLink>}
           />
         : state.backups.map((item) => <div key={item.filename} className="p-4 px-6 flex flex-wrap items-center justify-between gap-3" style={{ borderTop: '1px solid var(--m3-outline-variant)' }}>
           <div className="min-w-0"><div className="font-mono text-sm break-all">{item.filename}</div><div className="text-xs" style={{ color: 'var(--m3-secondary)' }}>{formatDateTime(item.createdAt)} · {(item.size / 1024 / 1024).toFixed(2)} MB</div></div>
           <div className="flex gap-2">
-            <button type="button" onClick={() => api.download(`/admin/backups/${encodeURIComponent(item.filename)}/download`, item.filename)} aria-label={`Download ${item.filename}`} className="btn btn-secondary btn-sm">Download</button>
-            <button type="button" onClick={() => setDeleteTarget(item.filename)} aria-label={`Delete ${item.filename}`} className="btn btn-danger-outline btn-sm">Delete</button>
+            <button type="button" onClick={() => api.download(`/admin/backups/${encodeURIComponent(item.filename)}/download`, item.filename)} aria-label={`Download ${item.filename}`} className="btn btn-secondary btn-sm">{uiText('Download')}</button>
+            <button type="button" onClick={() => setDeleteTarget(item.filename)} aria-label={`Delete ${item.filename}`} className="btn btn-danger-outline btn-sm">{uiText('Delete')}</button>
           </div>
         </div>)}
     </section>
-    {deleteTarget && <ConfirmModal title="Delete backup" message="This permanently deletes the backup archive. This action cannot be undone." confirmLabel="Delete backup" confirmationText={deleteTarget} pending={busy === 'delete'} pendingLabel="Deleting…" onConfirm={() => { if (!busy) void removeBackup(deleteTarget) }} onCancel={() => setDeleteTarget(null)} />}
+    {deleteTarget && <ConfirmModal title={uiText('Delete backup')} message="This permanently deletes the backup archive. This action cannot be undone." confirmLabel={uiText('Delete backup')} confirmationText={deleteTarget} pending={busy === 'delete'} pendingLabel="Deleting…" onConfirm={() => { if (!busy) void removeBackup(deleteTarget) }} onCancel={() => setDeleteTarget(null)} />}
   </PageContainer>
 }

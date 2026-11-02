@@ -9,6 +9,11 @@ export interface UiConfig {
   basePath: string
   /** For a user who does not belong in this interface (say, one who may only view a public page): the address to send them to instead. */
   redirectAfterSignIn?: (user: { role: string }) => string | null
+  /**
+   * Turns a text of the shared pages into the language of the interface. Called with the English text, which is also what
+   * a text without a translation should come back as. Left out, the interface stays in English.
+   */
+  translate?: (text: string) => string
   /** The names and pictures the application is known by. */
   brand: { name: string; logoLight: string; logoDark: string }
   /** Wording that names things only the application knows. */
@@ -41,6 +46,9 @@ export function configureUi(options: Partial<UiConfig>): void {
 }
 
 export const uiConfig = (): UiConfig => current
+
+/** A text of the shared pages in the language the application asked for with `configureUi({ translate })`. */
+export const uiText = (text: string): string => current.translate?.(text) ?? text
 
 /** The name the interface uses for `name` in storage and in window events. */
 export const storageKey = (name: string): string => `${current.storagePrefix}-${name}`

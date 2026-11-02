@@ -9,6 +9,7 @@ import { SingleSignOnModal } from '../components/SingleSignOnModal'
 import { useSsoConfirmation } from '../components/SsoConfirmation'
 import { Alert, EmptyStateLink, EmptyTableRow, ErrorState, LoadingState, PageContainer, PageHeader, useToast, DataTable, DataTh, useTableSort } from '../components/ui'
 import { formatDate } from '../lib/dateFormat'
+import { uiText } from '../config'
 
 interface User {
   id: number
@@ -111,7 +112,7 @@ export default function UsersPage({ roles: ROLES, roleRank: ROLE_RANK, defaultRo
     },
     onError: (err) => {
       setDeleteTarget(null)
-      toast.error(errorMessage(err, 'Failed to delete user'))
+      toast.error(errorMessage(err, uiText('Failed to delete user')))
     },
   })
 
@@ -148,7 +149,7 @@ export default function UsersPage({ roles: ROLES, roleRank: ROLE_RANK, defaultRo
   return (
     <PageContainer>
       <PageHeader
-        title="Users"
+        title={uiText('Users')}
         subtitle={isLoading || isError ? undefined : `${users.length} user${users.length !== 1 ? 's' : ''}`}
         actions={
           <>
@@ -180,19 +181,19 @@ export default function UsersPage({ roles: ROLES, roleRank: ROLE_RANK, defaultRo
       {/* Create user form */}
       {showCreate && (
         <div className="rounded-2xl p-5" style={{ background: 'var(--m3-surface-container-low)', border: '1px solid var(--m3-outline-variant)' }}>
-          <p className="font-headline font-semibold text-sm mb-3" style={{ color: 'var(--m3-on-surface)' }}>New User</p>
-          <label htmlFor={emailInputId} className="block text-xs mb-1.5" style={{ color: 'var(--m3-secondary)' }}>Email</label>
+          <p className="font-headline font-semibold text-sm mb-3" style={{ color: 'var(--m3-on-surface)' }}>{uiText('New User')}</p>
+          <label htmlFor={emailInputId} className="block text-xs mb-1.5" style={{ color: 'var(--m3-secondary)' }}>{uiText('Email')}</label>
           <div className="flex flex-wrap gap-3">
             <input
               id={emailInputId}
               type="email"
               value={newEmail}
               onChange={(e) => setNewEmail(e.target.value)}
-              placeholder="user@example.com"
+              placeholder={uiText('user@example.com')}
               className="input-sig flex-1 min-w-[200px]"
               onKeyDown={(e) => e.key === 'Enter' && newEmail && confirmCreateUser()}
             />
-            <select aria-label="Role" value={newRole} onChange={(e) => setNewRole(e.target.value)} className="input-sig w-auto">
+            <select aria-label={uiText('Role')} value={newRole} onChange={(e) => setNewRole(e.target.value)} className="input-sig w-auto">
               {ROLES.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
             </select>
             <button
@@ -259,7 +260,7 @@ export default function UsersPage({ roles: ROLES, roleRank: ROLE_RANK, defaultRo
 
       {/* Users table */}
       {isLoading ? (
-        <LoadingState label="Loading users…" />
+        <LoadingState label={uiText('Loading users…')} />
       ) : isError ? (
         <ErrorState message="Could not load users." onRetry={() => void refetch()} />
       ) : (
@@ -275,7 +276,7 @@ export default function UsersPage({ roles: ROLES, roleRank: ROLE_RANK, defaultRo
                     className={`px-4 py-3 font-mono text-xs uppercase tracking-wider ${h === '' ? 'text-right' : 'text-left'}`}
                     style={{ color: 'var(--m3-secondary)', background: 'var(--m3-surface-container)' }}
                   >
-                    {h === '' ? <span className="sr-only">Actions</span> : h}
+                    {h === '' ? <span className="sr-only">{uiText('Actions')}</span> : h}
                   </DataTh>
                 ))}
               </tr>
@@ -334,7 +335,7 @@ export default function UsersPage({ roles: ROLES, roleRank: ROLE_RANK, defaultRo
                         <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ background: 'var(--m3-surface-container-high)', color: 'var(--m3-on-surface)' }}>2FA</span>
                       )}
                       {user.ssoLinked && (
-                        <span className="text-xs font-medium px-2 py-0.5 rounded-full" title="Signed in through single sign-on; matched by their identity-provider account" style={{ background: 'var(--m3-surface-container-high)', color: 'var(--m3-on-surface)' }}>SSO</span>
+                        <span className="text-xs font-medium px-2 py-0.5 rounded-full" title={uiText('Signed in through single sign-on; matched by their identity-provider account')} style={{ background: 'var(--m3-surface-container-high)', color: 'var(--m3-on-surface)' }}>{uiText('SSO')}</span>
                       )}
                     </div>
                   </td>
@@ -347,7 +348,7 @@ export default function UsersPage({ roles: ROLES, roleRank: ROLE_RANK, defaultRo
                         <button
                           type="button"
                           onClick={() => { resetTwoFactorMutation.reset(); setTwoFactorResetTarget(user); setMessage('') }}
-                          title="Reset 2FA"
+                          title={uiText('Reset 2FA')}
                           aria-label={`Reset 2FA for ${user.email}`}
                           className={ROW_ACTION}
                           style={{ color: 'var(--m3-secondary)' }}
@@ -360,7 +361,7 @@ export default function UsersPage({ roles: ROLES, roleRank: ROLE_RANK, defaultRo
                       <button
                         type="button"
                         onClick={() => confirmResetPassword(user)}
-                        title="Reset password"
+                        title={uiText('Reset password')}
                         aria-label={`Reset password for ${user.email}`}
                         className={ROW_ACTION}
                         style={{ color: 'var(--m3-secondary)' }}
@@ -373,7 +374,7 @@ export default function UsersPage({ roles: ROLES, roleRank: ROLE_RANK, defaultRo
                         <button
                           type="button"
                           onClick={() => setDeleteTarget(user)}
-                          title="Delete user"
+                          title={uiText('Delete user')}
                           aria-label={`Delete ${user.email}`}
                           className={ROW_ACTION}
                           style={{ color: 'var(--m3-secondary)' }}
@@ -391,8 +392,8 @@ export default function UsersPage({ roles: ROLES, roleRank: ROLE_RANK, defaultRo
                 <EmptyTableRow
                   colSpan={5}
                   icon="group"
-                  title="No users yet."
-                  description={<><EmptyStateLink onClick={() => setShowCreate(true)}>Add a user</EmptyStateLink> to share access to the admin panel.</>}
+                  title={uiText('No users yet.')}
+                  description={<><EmptyStateLink onClick={() => setShowCreate(true)}>{uiText('Add a user')}</EmptyStateLink> to share access to the admin panel.</>}
                 />
               )}
             </tbody>
@@ -402,9 +403,9 @@ export default function UsersPage({ roles: ROLES, roleRank: ROLE_RANK, defaultRo
       {identityPrompt && <ConfirmIdentityModal {...identityPrompt} onClose={() => setIdentityPrompt(null)} />}
       {deleteTarget && (
         <ConfirmModal
-          title="Delete user"
+          title={uiText('Delete user')}
           message={`Delete user "${deleteTarget.email}"? This action cannot be undone.`}
-          confirmLabel="Delete"
+          confirmLabel={uiText('Delete')}
           pending={deleteMutation.isPending}
           pendingLabel="Deleting…"
           onConfirm={() => deleteMutation.mutate(deleteTarget.id)}
@@ -415,7 +416,7 @@ export default function UsersPage({ roles: ROLES, roleRank: ROLE_RANK, defaultRo
         <ResetTwoFactorModal
           email={twoFactorResetTarget.email}
           pending={resetTwoFactorMutation.isPending}
-          {...(resetTwoFactorMutation.error ? { error: errorMessage(resetTwoFactorMutation.error, 'Failed to reset two-factor authentication') } : {})}
+          {...(resetTwoFactorMutation.error ? { error: errorMessage(resetTwoFactorMutation.error, uiText('Failed to reset two-factor authentication')) } : {})}
           ssoConfirmation={ssoConfirmation}
           onConfirm={(currentPassword) => resetTwoFactorMutation.mutate({ id: twoFactorResetTarget.id, currentPassword })}
           onCancel={() => { if (!resetTwoFactorMutation.isPending) setTwoFactorResetTarget(null) }}

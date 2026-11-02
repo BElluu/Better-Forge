@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api, enterAfterSignIn, getCurrentUser, setSession, type AuthUser } from '../api/client'
 import { Alert, Field } from '../components/ui'
+import { uiText } from '../config'
 
 export default function ChangePasswordPage() {
   const navigate = useNavigate()
@@ -35,7 +36,7 @@ export default function ChangePasswordPage() {
             <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4" style={{ background: 'var(--m3-on-surface)' }}>
               <span className="material-symbols-outlined" aria-hidden="true" style={{ color: 'var(--m3-surface)', fontSize: '22px' }}>lock_reset</span>
             </div>
-            <h1 className="font-headline font-bold text-2xl" style={{ color: 'var(--m3-on-surface)' }}>Set your password</h1>
+            <h1 className="font-headline font-bold text-2xl" style={{ color: 'var(--m3-on-surface)' }}>{uiText('Set your password')}</h1>
             <p className="text-sm mt-1" style={{ color: 'var(--m3-secondary)' }}>
               {getCurrentUser()?.authMethod === 'oidc'
                 ? 'Password sign-in is enabled, so set your own password to replace the temporary one before continuing.'
@@ -45,7 +46,7 @@ export default function ChangePasswordPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && <Alert tone="error">{error}</Alert>}
-            <Field label="New Password" hint="Minimum 8 characters">
+            <Field label={uiText('New Password')} hint={uiText('Minimum 8 characters')}>
               <input
                 type="password"
                 autoComplete="new-password"
@@ -54,11 +55,11 @@ export default function ChangePasswordPage() {
                 required
                 minLength={8}
                 className="input-sig w-full"
-                placeholder="Minimum 8 characters"
+                placeholder={uiText('Minimum 8 characters')}
                 autoFocus
               />
             </Field>
-            <Field label="Confirm Password">
+            <Field label={uiText('Confirm Password')}>
               <input
                 type="password"
                 autoComplete="new-password"
@@ -66,7 +67,7 @@ export default function ChangePasswordPage() {
                 onChange={(e) => setConfirm(e.target.value)}
                 required
                 className="input-sig w-full"
-                placeholder="Repeat the password"
+                placeholder={uiText('Repeat the password')}
               />
             </Field>
             <button

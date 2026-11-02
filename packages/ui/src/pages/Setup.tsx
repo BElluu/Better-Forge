@@ -4,6 +4,7 @@ import { api, isAuthenticated, setSession, type AuthUser } from '../api/client'
 import { uiConfig } from '../config'
 import { useDarkMode } from '../hooks/useDarkMode'
 import { Alert } from '../components/ui'
+import { uiText } from '../config'
 
 const STEPS = [
   { n: 1, label: 'Database' },
@@ -97,7 +98,7 @@ export default function SetupPage() {
         </div>
 
         {/* Progress steps */}
-        <ol className="relative flex flex-col gap-0" aria-label="Setup progress">
+        <ol className="relative flex flex-col gap-0" aria-label={uiText('Setup progress')}>
           {STEPS.map((s, i) => {
             const isDone   = step > s.n
             const isActive = step === s.n
@@ -164,7 +165,7 @@ export default function SetupPage() {
           type="button"
           onClick={toggleDark}
           className="btn-icon absolute top-5 right-5 w-9 h-9 rounded-full"
-          aria-label="Toggle dark mode"
+          aria-label={uiText('Toggle dark mode')}
         >
           <span className="material-symbols-outlined" aria-hidden="true">
             {isDark ? 'light_mode' : 'dark_mode'}
@@ -186,7 +187,7 @@ export default function SetupPage() {
           {step === 1 && (
             <div>
               <div className="mb-8">
-                <p className="font-label text-xs uppercase tracking-widest mb-1" style={{ color: 'var(--m3-secondary)' }}>Step 1 of 3</p>
+                <p className="font-label text-xs uppercase tracking-widest mb-1" style={{ color: 'var(--m3-secondary)' }}>{uiText('Step 1 of 3')}</p>
                 <h1 className="font-headline font-bold text-2xl" style={{ color: 'var(--m3-on-surface)' }}>
                   Choose a database
                 </h1>
@@ -225,7 +226,7 @@ export default function SetupPage() {
                     </svg>
                   </div>
 
-                  <h3 className="font-headline font-bold text-base mb-1" style={{ color: 'var(--m3-on-surface)' }}>SQLite</h3>
+                  <h3 className="font-headline font-bold text-base mb-1" style={{ color: 'var(--m3-on-surface)' }}>{uiText('SQLite')}</h3>
                   <p className="font-sans text-xs leading-relaxed" style={{ color: 'var(--m3-secondary)' }}>
                     Built-in · No configuration needed
                   </p>
@@ -261,7 +262,7 @@ export default function SetupPage() {
                     </svg>
                   </div>
 
-                  <h3 className="font-headline font-bold text-base mb-1" style={{ color: 'var(--m3-on-surface)' }}>PostgreSQL</h3>
+                  <h3 className="font-headline font-bold text-base mb-1" style={{ color: 'var(--m3-on-surface)' }}>{uiText('PostgreSQL')}</h3>
                   <p className="font-sans text-xs leading-relaxed" style={{ color: 'var(--m3-secondary)' }}>
                     External database
                   </p>
@@ -307,7 +308,7 @@ export default function SetupPage() {
                   </svg>
                   Back
                 </button>
-                <p className="font-label text-xs uppercase tracking-widest mb-1" style={{ color: 'var(--m3-secondary)' }}>Step 2 of 3</p>
+                <p className="font-label text-xs uppercase tracking-widest mb-1" style={{ color: 'var(--m3-secondary)' }}>{uiText('Step 2 of 3')}</p>
                 <h1 className="font-headline font-bold text-2xl" style={{ color: 'var(--m3-on-surface)' }}>
                   Create admin account
                 </h1>
@@ -331,7 +332,7 @@ export default function SetupPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     className="input-m3"
-                    placeholder="admin@example.com"
+                    placeholder={uiText('admin@example.com')}
                     autoFocus
                   />
                 </div>
@@ -348,7 +349,7 @@ export default function SetupPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     className="input-m3"
-                    placeholder="Min. 8 characters"
+                    placeholder={uiText('Min. 8 characters')}
                   />
                 </div>
 
@@ -364,7 +365,7 @@ export default function SetupPage() {
                     onChange={(e) => setConfirm(e.target.value)}
                     required
                     className="input-m3"
-                    placeholder="Repeat password"
+                    placeholder={uiText('Repeat password')}
                   />
                 </div>
 
@@ -393,7 +394,7 @@ export default function SetupPage() {
                 </div>
               </div>
 
-              <p className="font-label text-xs uppercase tracking-widest mb-1" style={{ color: 'var(--m3-secondary)' }}>Step 3 of 3</p>
+              <p className="font-label text-xs uppercase tracking-widest mb-1" style={{ color: 'var(--m3-secondary)' }}>{uiText('Step 3 of 3')}</p>
               <h1 className="font-headline font-bold text-2xl mb-3" style={{ color: 'var(--m3-on-surface)' }}>
                 You're all set.
               </h1>

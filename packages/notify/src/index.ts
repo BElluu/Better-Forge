@@ -10,7 +10,7 @@ export { buildWebhookRequest, escapeJsonString, placeholderInAuthority, MAX_DELI
 export {
   createNotifyEngine, type ChannelRow, type DeliveryDetails, type DeliveryRow, type NotifyEngine, type NotifyEngineOptions, type SmtpMessage,
 } from './engine.js'
-export { readableTimestamp, renderSegments, type Notice, type NoticeFact, type NoticeSegment, type NoticeSeverity } from './notice.js'
+export { readableTimestamp, renderSegments, type Notice, type NoticeAction, type NoticeFact, type NoticeSegment, type NoticeSeverity } from './notice.js'
 export { createTransports, type TransportChannel, type TransportOptions, type Transports } from './transports.js'
 export { createNotifyRoutes, type KeyResult, type NotifyRoutesOptions } from './routes.js'
 export { createDeliveryWorker, type DeliveryWorkerOptions, type WorkerTask } from './worker.js'

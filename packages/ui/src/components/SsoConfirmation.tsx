@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { getCurrentUser, type ApiError } from '../api/client'
 import { storageKey, uiConfig } from '../config'
 import { Alert } from './ui'
+import { uiText } from '../config'
 
 /** The confirmation popup reports on this channel. Some providers cut `window.opener`, so no postMessage. */
 export const ssoConfirmChannel = (): string => storageKey('sso-confirm')
@@ -85,12 +86,12 @@ export type SsoConfirmationState = ReturnType<typeof useSsoConfirmation>
 /** Takes the place of a "current password" field in an SSO session: a note, or the popup's progress. */
 export function SsoConfirmationNote({ confirmation }: { confirmation: Pick<SsoConfirmationState, 'waiting' | 'cancel'> }) {
   if (!confirmation.waiting) {
-    return <p className="text-xs" style={{ color: 'var(--m3-secondary)' }}>You signed in with single sign-on, so no password is needed. You may be asked to sign in again in a pop-up window.</p>
+    return <p className="text-xs" style={{ color: 'var(--m3-secondary)' }}>{uiText('You signed in with single sign-on, so no password is needed. You may be asked to sign in again in a pop-up window.')}</p>
   }
   return (
-    <Alert tone="info" title="Confirm it's you">
-      <p>Sign in again with your identity provider in the pop-up window. This continues once you are done.</p>
-      <button type="button" className="btn btn-secondary btn-sm mt-3" onClick={confirmation.cancel}>Cancel</button>
+    <Alert tone="info" title={uiText('Confirm it\'s you')}>
+      <p>{uiText('Sign in again with your identity provider in the pop-up window. This continues once you are done.')}</p>
+      <button type="button" className="btn btn-secondary btn-sm mt-3" onClick={confirmation.cancel}>{uiText('Cancel')}</button>
     </Alert>
   )
 }

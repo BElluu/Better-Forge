@@ -213,6 +213,38 @@ describe('transports', () => {
   const through = (type: string, config: object, secret?: Record<string, string>) =>
     transports(secret).deliver({ type, config: JSON.stringify(config) }, {}, notice)
 
+  describe('action buttons', () => {
+    const withActions: Notice = { ...notice, actions: [{ label: 'Acknowledge', url: 'https://oncall.test/ack?x=1' }, { label: 'Evil', url: 'javascript:alert(1)' }, { label: '', url: 'https://oncall.test/blank' }] }
+    const deliverWith = (type: string, config: object) => transports().deliver({ type, config: JSON.stringify(config) }, {}, withActions)
+    interface Sent { attachments: { blocks: { type: string; elements?: { type: string; url: string; text: { text: string } }[] }[] }[]; potentialAction?: unknown; reply_markup?: unknown; actions?: unknown }
+    const body = () => JSON.parse(String(requests[0]!.init.body)) as Sent
+
+    it('puts web links as buttons in a Slack message, and drops anything else', async () => {
+      await deliverWith('slack', { webhookUrl: 'https://hook.test/s' })
+      const blocks = body().attachments[0]!.blocks
+      const actions = blocks.find((block) => block.type === 'actions')
+      assert.deepEqual(actions?.elements?.map((button) => [button.text.text, button.url]), [['Acknowledge', 'https://oncall.test/ack?x=1']])
+    })
+
+    it('adds an OpenUri action to a Teams card', async () => {
+      await deliverWith('teams', { webhookUrl: 'https://hook.test/t' })
+      assert.deepEqual(body().potentialAction, [{ '@type': 'OpenUri', name: 'Acknowledge', targets: [{ os: 'default', uri: 'https://oncall.test/ack?x=1' }] }])
+    })
+
+    it('adds an inline keyboard to a Telegram message and a view action to an ntfy one', async () => {
+      await deliverWith('telegram', { botToken: '1:T', chatId: '1' })
+      assert.deepEqual(body().reply_markup, { inline_keyboard: [[{ text: 'Acknowledge', url: 'https://oncall.test/ack?x=1' }]] })
+      requests.length = 0
+      await deliverWith('ntfy', { topic: 't' })
+      assert.deepEqual(body().actions, [{ action: 'view', label: 'Acknowledge', url: 'https://oncall.test/ack?x=1' }])
+    })
+
+    it('sends no buttons when the notice has none', async () => {
+      await through('slack', { webhookUrl: 'https://hook.test/s' })
+      assert.ok(!JSON.stringify(body()).includes('"actions"'))
+    })
+  })
+
   it('refuses a channel type it does not know', async () => {
     await assert.rejects(() => through('carrier-pigeon', {}), /Unsupported notification channel type: carrier-pigeon/)
   })

@@ -12,6 +12,7 @@ import type { VaultPickerProps } from '../components/formParts'
 import { uiConfig } from '../config'
 import { formatDate } from '../lib/dateFormat'
 import type { VaultRef } from '@better-forge/contracts'
+import { uiText } from '../config'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -138,7 +139,7 @@ export default function VaultPage() {
     },
     onError: (err) => {
       setDeleteVaultTarget(null)
-      toast.error(errorMessage(err, 'Failed to delete vault'))
+      toast.error(errorMessage(err, uiText('Failed to delete vault')))
     },
   })
 
@@ -146,13 +147,13 @@ export default function VaultPage() {
     mutationFn: ({ vaultId, secretId }: { vaultId: number; secretId: number }) =>
       api.delete(`/admin/vaults/${vaultId}/secrets/${secretId}`),
     onSuccess: () => {
-      toast.success('Secret deleted.')
+      toast.success(uiText('Secret deleted.'))
       setDeleteSecretTarget(null)
       qc.invalidateQueries({ queryKey: ['vault-secrets', selectedVaultId] })
     },
     onError: (err) => {
       setDeleteSecretTarget(null)
-      toast.error(errorMessage(err, 'Failed to delete secret'))
+      toast.error(errorMessage(err, uiText('Failed to delete secret')))
     },
   })
 
@@ -180,13 +181,13 @@ export default function VaultPage() {
     <div className="flex flex-col md:flex-row h-full md:overflow-hidden fade-up">
       {/* ── Left sidebar: vault list ── */}
       <aside
-        aria-label="Vaults"
+        aria-label={uiText('Vaults')}
         className="w-full md:w-64 flex flex-col shrink-0 md:overflow-y-auto border-b md:border-b-0 md:border-r"
         style={{ borderColor: 'var(--m3-outline-variant)', background: 'var(--m3-surface-container-low)' }}
       >
         <div className="flex items-center justify-between px-4 py-4" style={{ borderBottom: '1px solid var(--m3-outline-variant)' }}>
           <div>
-            <h1 className="font-headline font-bold text-base" style={{ color: 'var(--m3-on-surface)' }}>Vaults</h1>
+            <h1 className="font-headline font-bold text-base" style={{ color: 'var(--m3-on-surface)' }}>{uiText('Vaults')}</h1>
             {vaultsQuery.data && (
               <p className="text-xs mt-0.5" style={{ color: 'var(--m3-secondary)' }}>{vaults.length} vault{vaults.length !== 1 ? 's' : ''}</p>
             )}
@@ -195,8 +196,8 @@ export default function VaultPage() {
             type="button"
             onClick={() => setShowCreateVault(true)}
             className="btn btn-primary btn-sm px-2"
-            aria-label="Create vault"
-            title="Create vault"
+            aria-label={uiText('Create vault')}
+            title={uiText('Create vault')}
           >
             <span className="material-symbols-outlined" aria-hidden="true">add</span>
           </button>
@@ -205,7 +206,7 @@ export default function VaultPage() {
         <div className="flex-1 p-2 space-y-1">
           {/* Local vaults */}
           {vaultsQuery.isLoading ? (
-            <LoadingState label="Loading vaults…" className="py-6" />
+            <LoadingState label={uiText('Loading vaults…')} className="py-6" />
           ) : vaultsQuery.isError ? (
             <ErrorState message="Could not load vaults." onRetry={() => void vaultsQuery.refetch()} className="px-3 py-6" />
           ) : (
@@ -220,7 +221,7 @@ export default function VaultPage() {
                 />
               ))}
               {vaults.length === 0 && (
-                <p className="text-xs text-center py-6" style={{ color: 'var(--m3-secondary)' }}>No vaults yet</p>
+                <p className="text-xs text-center py-6" style={{ color: 'var(--m3-secondary)' }}>{uiText('No vaults yet')}</p>
               )}
             </>
           )}
@@ -264,7 +265,7 @@ export default function VaultPage() {
 
             <div className="flex-1 overflow-y-auto p-4 md:p-6">
               {secretsQuery.isLoading ? (
-                <LoadingState label="Loading secrets…" />
+                <LoadingState label={uiText('Loading secrets…')} />
               ) : secretsQuery.isError ? (
                 <ErrorState message="Could not load the secrets in this vault." onRetry={() => void secretsQuery.refetch()} />
               ) : secrets.length === 0 ? (
@@ -272,8 +273,8 @@ export default function VaultPage() {
                   icon="key_off"
                   title={isReferenceVault(selectedVault.type) ? 'No references in this vault' : 'No secrets in this vault'}
                   description={isReferenceVault(selectedVault.type)
-                    ? <><EmptyStateLink onClick={() => setShowCreateSecret(true)}>Add a reference</EmptyStateLink> to a path in HashiCorp Vault that {uiConfig().texts.secretConsumers} can use. {uiConfig().texts.appName} only reads from HashiCorp Vault; it never creates or changes secrets there.</>
-                    : <><EmptyStateLink onClick={() => setShowCreateSecret(true)}>Add a secret</EmptyStateLink> to store credentials, tokens or JSON configuration that {uiConfig().texts.secretConsumers} can reference.</>}
+                    ? <><EmptyStateLink onClick={() => setShowCreateSecret(true)}>{uiText('Add a reference')}</EmptyStateLink> to a path in HashiCorp Vault that {uiConfig().texts.secretConsumers} can use. {uiConfig().texts.appName} only reads from HashiCorp Vault; it never creates or changes secrets there.</>
+                    : <><EmptyStateLink onClick={() => setShowCreateSecret(true)}>{uiText('Add a secret')}</EmptyStateLink> to store credentials, tokens or JSON configuration that {uiConfig().texts.secretConsumers} can reference.</>}
                 />
               ) : (
                 <div className="space-y-2">
@@ -293,7 +294,7 @@ export default function VaultPage() {
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center gap-3 py-16" style={{ color: 'var(--m3-secondary)' }}>
             <span className="material-symbols-outlined" aria-hidden="true" style={{ fontSize: '56px', opacity: 0.3 }}>shield_lock</span>
-            <p className="text-sm">Select a vault to view its secrets</p>
+            <p className="text-sm">{uiText('Select a vault to view its secrets')}</p>
           </div>
         )}
       </main>
@@ -311,7 +312,7 @@ export default function VaultPage() {
           vaultId={selectedVaultId}
           vaultType={selectedVault?.type ?? 'local'}
           onClose={() => setShowCreateSecret(false)}
-          onCreated={() => { qc.invalidateQueries({ queryKey: ['vault-secrets', selectedVaultId] }); setShowCreateSecret(false); toast.success('Secret saved.') }}
+          onCreated={() => { qc.invalidateQueries({ queryKey: ['vault-secrets', selectedVaultId] }); setShowCreateSecret(false); toast.success(uiText('Secret saved.')) }}
         />
       )}
       {showConnection && selectedVault?.type === 'hashicorp' && (
@@ -319,7 +320,7 @@ export default function VaultPage() {
           vaultId={selectedVault.id}
           vaults={vaults}
           onClose={() => setShowConnection(false)}
-          onSaved={() => { qc.invalidateQueries({ queryKey: ['vaults'] }); setShowConnection(false); toast.success('Connection settings saved.') }}
+          onSaved={() => { qc.invalidateQueries({ queryKey: ['vaults'] }); setShowConnection(false); toast.success(uiText('Connection settings saved.')) }}
         />
       )}
       {revealedSecret && (
@@ -336,9 +337,9 @@ export default function VaultPage() {
       )}
       {deleteSecretTarget && (
         <ConfirmModal
-          title="Delete secret"
+          title={uiText('Delete secret')}
           message={`Delete secret "${deleteSecretTarget.name}"? This action cannot be undone.`}
-          confirmLabel="Delete"
+          confirmLabel={uiText('Delete')}
           pending={deleteSecret.isPending}
           pendingLabel="Deleting…"
           onConfirm={() => deleteSecret.mutate({ vaultId: deleteSecretTarget.vaultId, secretId: deleteSecretTarget.id })}
@@ -383,7 +384,7 @@ function VaultRow({ vault, isSelected, onClick, onDelete }: {
         type="button"
         onClick={onDelete}
         aria-label={`Delete vault ${vault.name}`}
-        title="Delete vault"
+        title={uiText('Delete vault')}
         className="btn-icon w-7 h-7 mr-1.5 shrink-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100 hover:!text-[color:var(--m3-down)]"
       >
         <span className="material-symbols-outlined" aria-hidden="true" style={{ fontSize: '16px' }}>close</span>
@@ -424,7 +425,7 @@ function SecretRow({ secret, isRevealing, onReveal, onDelete }: {
           type="button"
           onClick={onDelete}
           aria-label={`Delete secret ${secret.name}`}
-          title="Delete secret"
+          title={uiText('Delete secret')}
           className="btn-icon hover:!text-[color:var(--m3-down)]"
         >
           <span className="material-symbols-outlined" aria-hidden="true" style={{ fontSize: '16px' }}>delete</span>
@@ -452,12 +453,12 @@ function DeleteVaultModal({ vault, secretCount, pending, onClose, onConfirm }: {
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="Delete vault"
+        aria-label={uiText('Delete vault')}
         aria-busy={pending || undefined}
         className="rounded-2xl w-full max-w-sm"
         style={{ background: 'var(--m3-surface-container-low)', border: '1px solid var(--m3-outline-variant)' }}
       >
-        <ModalHeader icon="warning" title="Delete vault" onClose={pending ? () => {} : onClose} />
+        <ModalHeader icon="warning" title={uiText('Delete vault')} onClose={pending ? () => {} : onClose} />
         <div className="p-6 space-y-4">
         <p className="text-sm" style={{ color: 'var(--m3-on-surface-variant)' }}>
           You are about to delete <span className="font-semibold" style={{ color: 'var(--m3-on-surface)' }}>{vault.name}</span>.
@@ -531,7 +532,7 @@ function CreateVaultModal({ vaults, onClose, onCreated }: { vaults: Vault[]; onC
       })
       onCreated(vault)
     } catch (err) {
-      setError(errorMessage(err, 'Failed to create vault'))
+      setError(errorMessage(err, uiText('Failed to create vault')))
     } finally {
       setLoading(false)
     }
@@ -540,19 +541,19 @@ function CreateVaultModal({ vaults, onClose, onCreated }: { vaults: Vault[]; onC
   const hashicorp = type === 'hashicorp'
   return (
     <ConnectionDialog
-      title="Create Vault"
+      title={uiText('Create Vault')}
       icon="shield_lock"
       onClose={onClose}
       onSubmit={handleSubmit}
       advanced={hashicorp ? { connection, onChange: setConnection } : null}
-      footer={<ModalActions onClose={onClose} loading={loading} submitLabel="Create Vault" test={hashicorp ? test : undefined} />}
+      footer={<ModalActions onClose={onClose} loading={loading} submitLabel={uiText('Create Vault')} test={hashicorp ? test : undefined} />}
     >
       {error && <Alert tone="error">{error}</Alert>}
-      <Field label="Vault name" required>
-        <input value={name} onChange={(e) => setName(e.target.value)} required className="input-sig" placeholder="My Credentials" autoFocus />
+      <Field label={uiText('Vault name')} required>
+        <input value={name} onChange={(e) => setName(e.target.value)} required className="input-sig" placeholder={uiText('My Credentials')} autoFocus />
       </Field>
-      <Field label="Description (optional)">
-        <input value={description} onChange={(e) => setDescription(e.target.value)} className="input-sig" placeholder="What this vault stores…" />
+      <Field label={uiText('Description (optional)')}>
+        <input value={description} onChange={(e) => setDescription(e.target.value)} className="input-sig" placeholder={uiText('What this vault stores…')} />
       </Field>
       <VaultTypePicker value={type} onChange={setType} />
       {hashicorp && <ConnectionFields value={connection} onChange={setConnection} pickers={pickers} />}
@@ -600,7 +601,7 @@ function CreateSecretModal({ vaultId, vaultType, onClose, onCreated }: { vaultId
       await api.post(`/admin/vaults/${vaultId}/secrets`, body)
       onCreated()
     } catch (err) {
-      setError(errorMessage(err, 'Failed to create secret'))
+      setError(errorMessage(err, uiText('Failed to create secret')))
     } finally {
       setLoading(false)
     }
@@ -619,11 +620,11 @@ function CreateSecretModal({ vaultId, vaultType, onClose, onCreated }: { vaultId
         {error && <Alert tone="error">{error}</Alert>}
         {isReference && <Alert tone="info">This only points at a secret that already exists in HashiCorp Vault. {uiConfig().texts.appName} reads it when needed and never creates, changes or deletes anything there.</Alert>}
         <Field label={isReference ? 'Reference name' : 'Secret name'} required>
-          <input value={name} onChange={(e) => setName(e.target.value)} required className="input-sig" placeholder="my-api-key" autoFocus />
+          <input value={name} onChange={(e) => setName(e.target.value)} required className="input-sig" placeholder={uiText('my-api-key')} autoFocus />
         </Field>
 
         <div role="group" aria-labelledby={typeLabelId}>
-          <p id={typeLabelId} className="block font-mono text-xs uppercase tracking-wider mb-2" style={{ color: 'var(--m3-secondary)' }}>Type</p>
+          <p id={typeLabelId} className="block font-mono text-xs uppercase tracking-wider mb-2" style={{ color: 'var(--m3-secondary)' }}>{uiText('Type')}</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             {types.map((t) => (
               <button
@@ -643,33 +644,33 @@ function CreateSecretModal({ vaultId, vaultType, onClose, onCreated }: { vaultId
 
         {isReference && (
           <>
-            <Field label="Path" required hint={type === 'userpass' ? 'Reads the keys "username" and "password" at this path.' : type === 'json' ? 'Reads every key at this path.' : 'Path of the KV v2 secret, relative to the mount.'}>
+            <Field label={uiText('Path')} required hint={type === 'userpass' ? 'Reads the keys "username" and "password" at this path.' : type === 'json' ? 'Reads every key at this path.' : 'Path of the KV v2 secret, relative to the mount.'}>
               <input value={path} onChange={(e) => setPath(e.target.value)} required className="input-sig font-mono" placeholder={uiConfig().texts.vaultPathExample} autoComplete="off" />
             </Field>
             {type === 'value' && (
-              <Field label="Key" required>
-                <input value={secretKey} onChange={(e) => setSecretKey(e.target.value)} required className="input-sig font-mono" placeholder="api_key" autoComplete="off" />
+              <Field label={uiText('Key')} required>
+                <input value={secretKey} onChange={(e) => setSecretKey(e.target.value)} required className="input-sig font-mono" placeholder={uiText('api_key')} autoComplete="off" />
               </Field>
             )}
           </>
         )}
         {!isReference && type === 'userpass' && (
           <>
-            <Field label="Username" required>
-              <input value={username} onChange={(e) => setUsername(e.target.value)} required className="input-sig" placeholder="admin" autoComplete="off" />
+            <Field label={uiText('Username')} required>
+              <input value={username} onChange={(e) => setUsername(e.target.value)} required className="input-sig" placeholder={uiText('admin')} autoComplete="off" />
             </Field>
-            <Field label="Password" required>
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="input-sig" placeholder="••••••••" autoComplete="new-password" />
+            <Field label={uiText('Password')} required>
+              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="input-sig" placeholder={uiText('••••••••')} autoComplete="new-password" />
             </Field>
           </>
         )}
         {!isReference && type === 'value' && (
-          <Field label="Value" required>
-            <input value={value} onChange={(e) => setValue(e.target.value)} required className="input-sig" placeholder="Bearer eyJ…" autoComplete="off" />
+          <Field label={uiText('Value')} required>
+            <input value={value} onChange={(e) => setValue(e.target.value)} required className="input-sig" placeholder={uiText('Bearer eyJ…')} autoComplete="off" />
           </Field>
         )}
         {!isReference && type === 'json' && (
-          <Field label="JSON" required error={jsonError || undefined}>
+          <Field label={uiText('JSON')} required error={jsonError || undefined}>
             <textarea
               value={json}
               onChange={(e) => { setJson(e.target.value); validateJson(e.target.value) }}
@@ -705,12 +706,12 @@ function ConnectionFields({ value, onChange, pickers, keepHint }: { value: Conne
   const insecure = value.address.trim().toLowerCase().startsWith('http://')
   return (
     <div className="space-y-4">
-      <Field label="Address" required>
-        <input type="url" value={value.address} onChange={(e) => set({ address: e.target.value })} required className="input-sig font-mono" placeholder="https://vault.example.com:8200" autoComplete="off" />
+      <Field label={uiText('Address')} required>
+        <input type="url" value={value.address} onChange={(e) => set({ address: e.target.value })} required className="input-sig font-mono" placeholder={uiText('https://vault.example.com:8200')} autoComplete="off" />
       </Field>
-      {insecure && <Alert tone="warning">The token is sent unencrypted over http://. Use https:// unless Vault is on a trusted private network.</Alert>}
+      {insecure && <Alert tone="warning">{uiText('The token is sent unencrypted over http://. Use https:// unless Vault is on a trusted private network.')}</Alert>}
       <div role="group" aria-labelledby={authLabelId}>
-        <p id={authLabelId} className="block font-mono text-xs uppercase tracking-wider mb-2" style={{ color: 'var(--m3-secondary)' }}>Auth method</p>
+        <p id={authLabelId} className="block font-mono text-xs uppercase tracking-wider mb-2" style={{ color: 'var(--m3-secondary)' }}>{uiText('Auth method')}</p>
         <div className="flex gap-2">
           {(['token', 'approle'] as const).map((method) => (
             <button
@@ -739,15 +740,15 @@ function ConnectionFields({ value, onChange, pickers, keepHint }: { value: Conne
           : 'Read the Role ID and Secret ID from a local vault secret.'}
       >
         {value.authMethod === 'token' ? (
-          <Field label="Token" required={!keepHint} hint={credentialHint}>
+          <Field label={uiText('Token')} required={!keepHint} hint={credentialHint}>
             <input type="password" value={value.token} onChange={(e) => set({ token: e.target.value })} required={!keepHint} className="input-sig font-mono" autoComplete="new-password" />
           </Field>
         ) : (
           <>
-            <Field label="Role ID" required>
+            <Field label={uiText('Role ID')} required>
               <input value={value.roleId} onChange={(e) => set({ roleId: e.target.value })} required className="input-sig font-mono" autoComplete="off" />
             </Field>
-            <Field label="Secret ID" required={!keepHint} hint={credentialHint}>
+            <Field label={uiText('Secret ID')} required={!keepHint} hint={credentialHint}>
               <input type="password" value={value.secretId} onChange={(e) => set({ secretId: e.target.value })} required={!keepHint} className="input-sig font-mono" autoComplete="new-password" />
             </Field>
           </>
@@ -762,19 +763,19 @@ function ConnectionAdvanced({ value, onChange }: { value: ConnectionForm; onChan
   const set = (patch: Partial<ConnectionForm>) => onChange({ ...value, ...patch })
   return (
     <div className="space-y-4">
-      <Field label="Namespace (optional)">
-        <input value={value.namespace} onChange={(e) => set({ namespace: e.target.value })} className="input-sig font-mono" placeholder="team-a" autoComplete="off" />
+      <Field label={uiText('Namespace (optional)')}>
+        <input value={value.namespace} onChange={(e) => set({ namespace: e.target.value })} className="input-sig font-mono" placeholder={uiText('team-a')} autoComplete="off" />
       </Field>
-      <Field label="KV v2 mount" required>
+      <Field label={uiText('KV v2 mount')} required>
         <input value={value.mount} onChange={(e) => set({ mount: e.target.value })} required className="input-sig font-mono" placeholder={DEFAULT_MOUNT} autoComplete="off" />
       </Field>
       {value.authMethod === 'approle' && (
-        <Field label="AppRole mount">
+        <Field label={uiText('AppRole mount')}>
           <input value={value.approleMount} onChange={(e) => set({ approleMount: e.target.value })} className="input-sig font-mono" placeholder={DEFAULT_APPROLE_MOUNT} autoComplete="off" />
         </Field>
       )}
-      <Field label="CA certificate (optional)" hint="PEM. Only for a private CA; include the full chain.">
-        <textarea value={value.caCert} onChange={(e) => set({ caCert: e.target.value })} rows={5} className="input-sig font-mono text-xs resize-none" placeholder="-----BEGIN CERTIFICATE-----" />
+      <Field label={uiText('CA certificate (optional)')} hint={uiText('PEM. Only for a private CA; include the full chain.')}>
+        <textarea value={value.caCert} onChange={(e) => set({ caCert: e.target.value })} rows={5} className="input-sig font-mono text-xs resize-none" placeholder={uiText('-----BEGIN CERTIFICATE-----')} />
       </Field>
     </div>
   )
@@ -882,7 +883,7 @@ function ConnectionSettingsModal({ vaultId, vaults, onClose, onSaved }: { vaultI
       await api.patch(`/admin/vaults/${vaultId}`, { connection: connectionPayload(current) })
       onSaved()
     } catch (err) {
-      setError(errorMessage(err, 'Failed to save connection settings'))
+      setError(errorMessage(err, uiText('Failed to save connection settings')))
     } finally {
       setLoading(false)
     }
@@ -890,15 +891,15 @@ function ConnectionSettingsModal({ vaultId, vaults, onClose, onSaved }: { vaultI
 
   if (!current) {
     return (
-      <Modal title="Connection settings" icon="settings" onClose={onClose}>
+      <Modal title={uiText('Connection settings')} icon="settings" onClose={onClose}>
         {query.isError
           ? <ErrorState message="Could not load the connection settings." onRetry={() => void query.refetch()} />
-          : <LoadingState label="Loading…" />}
+          : <LoadingState label={uiText('Loading…')} />}
       </Modal>
     )
   }
   return (
-    <ConnectionDialog title="Connection settings" icon="settings" onClose={onClose} onSubmit={handleSubmit} advanced={{ connection: current, onChange: change }} footer={<ModalActions onClose={onClose} loading={loading} submitLabel="Save" test={test} />}>
+    <ConnectionDialog title={uiText('Connection settings')} icon="settings" onClose={onClose} onSubmit={handleSubmit} advanced={{ connection: current, onChange: change }} footer={<ModalActions onClose={onClose} loading={loading} submitLabel={uiText('Save')} test={test} />}>
       {error && <Alert tone="error">{error}</Alert>}
       <ConnectionFields value={current} onChange={change} pickers={pickers} keepHint={hasSavedDirect} />
       {test.result && <Alert tone={test.result.ok ? 'success' : 'error'}>{test.result.text}</Alert>}
@@ -938,8 +939,8 @@ function RevealModal({ secret, onClose }: { secret: RevealedSecret; onClose: () 
 
         {secret.type === 'userpass' && (
           <>
-            <RevealField label="Username" value={secret.value.username ?? ''} mono />
-            <RevealField label="Password" value={secret.value.password ?? ''} hidden={!showPassword} mono
+            <RevealField label={uiText('Username')} value={secret.value.username ?? ''} mono />
+            <RevealField label={uiText('Password')} value={secret.value.password ?? ''} hidden={!showPassword} mono
               action={
                 <button type="button" onClick={() => setShowPassword((p) => !p)} aria-pressed={showPassword} className="btn btn-ghost btn-sm py-1 text-xs">
                   {showPassword ? 'Hide' : 'Show'}
@@ -949,16 +950,16 @@ function RevealModal({ secret, onClose }: { secret: RevealedSecret; onClose: () 
           </>
         )}
         {(secret.type === 'value') && (
-          <RevealField label="Value" value={secret.value.value ?? ''} mono />
+          <RevealField label={uiText('Value')} value={secret.value.value ?? ''} mono />
         )}
         {json && (
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <p className="text-[10px] uppercase tracking-wider" style={{ color: 'var(--m3-secondary)' }}>JSON</p>
+              <p className="text-[10px] uppercase tracking-wider" style={{ color: 'var(--m3-secondary)' }}>{uiText('JSON')}</p>
               <CopyButton value={json.text} iconOnly />
             </div>
             {!json.valid && (
-              <Alert tone="warning" className="mb-2">The stored value is not valid JSON; showing it as plain text.</Alert>
+              <Alert tone="warning" className="mb-2">{uiText('The stored value is not valid JSON; showing it as plain text.')}</Alert>
             )}
             <pre className="text-xs p-3 rounded-xl overflow-auto max-h-64" style={{ background: 'var(--m3-surface-container-high)', color: 'var(--m3-on-surface)', fontFamily: 'monospace' }}>
               {json.text}
@@ -1027,7 +1028,7 @@ function ModalActions({ onClose, loading, submitLabel, test }: { onClose: () => 
         </button>
       ) : undefined}
     >
-      <button type="button" onClick={onClose} className="btn btn-secondary">Cancel</button>
+      <button type="button" onClick={onClose} className="btn btn-secondary">{uiText('Cancel')}</button>
       <button type="submit" disabled={loading} className="btn btn-primary">
         {loading ? 'Saving…' : submitLabel}
       </button>
