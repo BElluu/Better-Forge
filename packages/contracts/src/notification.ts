@@ -1,6 +1,6 @@
 import type { VaultRef } from './vault.js'
 
-export type NotificationChannelType = 'email' | 'webhook' | 'discord' | 'teams' | 'slack' | 'telegram' | 'ntfy' | 'pushover'
+export type NotificationChannelType = 'email' | 'webhook' | 'discord' | 'teams' | 'slack' | 'telegram' | 'ntfy' | 'pushover' | 'twilio'
 
 export interface EmailNotificationConfig {
   to: string
@@ -62,12 +62,28 @@ export interface PushoverNotificationConfig {
   text?: string
 }
 
+export interface TwilioNotificationConfig {
+  /** Account SID (`AC` and 32 hex digits). */
+  accountSid: string
+  /** Auth token; the API only ever returns it masked. Ignored when `vault` is set. */
+  authToken?: string
+  /** Vault secret holding the auth token: a `value` secret. */
+  vault?: VaultRef
+  /** The Twilio number the messages come from, in E.164 (`+15551234567`). */
+  from: string
+  /** Who receives them, in E.164. May be a placeholder such as `{{phone}}` that the application fills in per event. */
+  to: string
+  /** A text message (default) or a voice call that reads the notice. */
+  mode?: 'sms' | 'call'
+  text?: string
+}
+
 /** The wording a channel has for one kind of event, by event type: only the message fields of its type (subject, body, text...). */
 export interface ChannelEventOverrides {
   eventOverrides?: Record<string, Record<string, string>>
 }
 
-export type NotificationChannelConfig = (EmailNotificationConfig | WebhookNotificationConfig | DiscordNotificationConfig | TeamsNotificationConfig | SlackNotificationConfig | TelegramNotificationConfig | NtfyNotificationConfig | PushoverNotificationConfig) & ChannelEventOverrides
+export type NotificationChannelConfig = (EmailNotificationConfig | WebhookNotificationConfig | DiscordNotificationConfig | TeamsNotificationConfig | SlackNotificationConfig | TelegramNotificationConfig | NtfyNotificationConfig | PushoverNotificationConfig | TwilioNotificationConfig) & ChannelEventOverrides
 
 /** Quiet hours silence a channel during a recurring local-time window. */
 export interface QuietHoursPolicy {

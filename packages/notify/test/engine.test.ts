@@ -2,9 +2,10 @@ import assert from 'node:assert/strict'
 import { afterEach, beforeEach, describe, it } from 'node:test'
 import { openDatabase, runMigrations, type Database } from '@better-forge/db'
 import {
-  createNotifyDbModule, createNotifyEngine, createTransports, MAX_DELIVERY_ATTEMPTS,
+  CHANNEL_DESTINATIONS, CHANNEL_SECRETS, createNotifyDbModule, createNotifyEngine, createTransports, MAX_DELIVERY_ATTEMPTS, twilioConfigError,
   type ChannelRow, type Notice, type NotifyEngineOptions,
 } from '@better-forge/notify'
+import { createSecretFields, SECRET_MASK, uniqueSecretFields } from '@better-forge/vault'
 
 const module = createNotifyDbModule({ sourceIdColumn: 'source_id', sourceNameColumn: 'source_name', smtpFromName: 'Alerts', newKey: () => crypto.randomUUID() })
 const { notificationChannels, notificationDeliveries, notificationDeliveryAttempts } = module.tables
@@ -225,6 +226,64 @@ describe('transports', () => {
     await through('pushover', { userKey: 'u', vault: { vaultId: 1, secretId: 1 } }, { value: ' from-vault ' })
     assert.equal(JSON.parse(String(requests[0]!.init.body))['token'], 'from-vault')
     await assert.rejects(() => through('pushover', { userKey: 'u', vault: { vaultId: 1, secretId: 1 } }, {}), /Pushover vault secret has no application token/)
+  })
+
+  describe('Twilio', () => {
+    const sid = `AC${'0123456789abcdef'.repeat(2)}`
+    const config = { accountSid: sid, authToken: 'tok', from: '+15550001111', to: '+48500100200' }
+
+    it('sends a text message to the account with basic authentication', async () => {
+      await through('twilio', config)
+      const [request] = requests
+      assert.equal(request!.url, `https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`)
+      assert.equal((request!.init.headers as Record<string, string>)['Authorization'], `Basic ${Buffer.from(`${sid}:tok`).toString('base64')}`)
+      const form = request!.init.body as URLSearchParams
+      assert.equal(form.get('To'), '+48500100200')
+      assert.equal(form.get('From'), '+15550001111')
+      assert.match(form.get('Body')!, /Server a is DOWN/)
+    })
+
+    it('places a call that reads the notice, with the text escaped for TwiML', async () => {
+      await transports().deliver({ type: 'twilio', config: JSON.stringify({ ...config, mode: 'call' }) }, {}, { ...notice, headline: ['Disk <b> & more'] })
+      assert.match(requests[0]!.url, /\/Calls\.json$/)
+      const twiml = (requests[0]!.init.body as URLSearchParams).get('Twiml')!
+      assert.match(twiml, /^<Response><Say>Disk &lt;b&gt; &amp; more/)
+    })
+
+    it('fills in the recipient per event, and refuses anything that is not a phone number', async () => {
+      await transports().deliver({ type: 'twilio', config: JSON.stringify({ ...config, to: '{{phone}}' }) }, { phone: '+48600700800' }, notice)
+      assert.equal((requests[0]!.init.body as URLSearchParams).get('To'), '+48600700800')
+      await assert.rejects(
+        () => transports().deliver({ type: 'twilio', config: JSON.stringify({ ...config, to: '{{phone}}' }) }, { phone: '../x' }, notice),
+        /not a phone number/,
+      )
+      assert.equal(requests.length, 1)
+    })
+
+    it('reports the reason Twilio gives, without the token', async () => {
+      answer = () => new Response('{"message":"The From phone number is not valid"}', { status: 400 })
+      await assert.rejects(() => through('twilio', config), (error: Error) => {
+        assert.equal(error.message, 'Twilio API returned HTTP 400: The From phone number is not valid')
+        return true
+      })
+    })
+
+    it('keeps the auth token out of what the API shows', () => {
+      const secrets = createSecretFields<'channel'>({ channel: { fields: uniqueSecretFields(Object.values(CHANNEL_SECRETS).flat()), destinations: CHANNEL_DESTINATIONS } })
+      const shown = secrets.maskSecrets('channel', { ...config, authToken: 'a-long-twilio-auth-token' })
+      assert.ok(!JSON.stringify(shown).includes('a-long-twilio-auth-t'))
+      assert.equal(shown['authToken'], `${SECRET_MASK}oken`)
+    })
+
+    it('validates the config the way the routes do', () => {
+      assert.equal(twilioConfigError(config), null)
+      assert.match(twilioConfigError({ ...config, accountSid: 'nope' })!, /Account SID/)
+      assert.match(twilioConfigError({ ...config, from: '555' })!, /sending number/)
+      assert.match(twilioConfigError({ ...config, to: '12345' })!, /international format/)
+      assert.equal(twilioConfigError({ ...config, to: '{{phone}}' }), null)
+      assert.match(twilioConfigError({ ...config, mode: 'fax' })!, /sms or call/)
+      assert.match(twilioConfigError({ ...config, authToken: '' })!, /Auth Token/)
+    })
   })
 
   it('refuses an ntfy token that cannot travel in a header, without echoing it', async () => {

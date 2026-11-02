@@ -1,7 +1,7 @@
 import type { NotificationChannelType } from '@better-forge/contracts'
 import { placeholderInAuthority } from './template.js'
 
-export const CHANNEL_TYPES: readonly NotificationChannelType[] = ['email', 'webhook', 'discord', 'teams', 'slack', 'telegram', 'ntfy', 'pushover']
+export const CHANNEL_TYPES: readonly NotificationChannelType[] = ['email', 'webhook', 'discord', 'teams', 'slack', 'telegram', 'ntfy', 'pushover', 'twilio']
 
 type TokenConfig = { vault?: { vaultId?: unknown; secretId?: unknown }; [key: string]: unknown }
 
@@ -63,6 +63,22 @@ export function pushoverConfigError(config: unknown): string | null {
   return credentialError(c, 'appToken', 'application token', 'Pushover needs an Application Token')
 }
 
+const TWILIO_ACCOUNT_SID = /^AC[0-9a-fA-F]{32}$/
+const E164 = /^\+[1-9]\d{6,14}$/
+
+/** Twilio needs an account SID, a sending number, a recipient (a number or a placeholder) and an auth token, direct or from the vault. */
+export function twilioConfigError(config: unknown): string | null {
+  const c = asConfig(config)
+  if (!isText(c['accountSid']) || !TWILIO_ACCOUNT_SID.test(c['accountSid'].trim())) return 'Twilio needs an Account SID (AC followed by 32 hex digits)'
+  if (!isText(c['from']) || !E164.test(c['from'].trim())) return 'Twilio needs a sending number in international format, such as +15551234567'
+  const to = c['to']
+  if (!isText(to)) return 'Twilio needs a recipient number'
+  if (!to.includes('{{') && !E164.test(to.trim())) return 'The recipient must be a number in international format, such as +15551234567'
+  const mode = c['mode']
+  if (mode !== undefined && mode !== 'sms' && mode !== 'call') return 'Mode must be sms or call'
+  return credentialError(c, 'authToken', 'auth token', 'Twilio needs an Auth Token')
+}
+
 /** The first problem with a channel's config that depends on its type, or null. */
 export function channelConfigError(type: string, config: unknown): string | null {
   const overridesProblem = eventOverridesError(type, config)
@@ -91,6 +107,7 @@ export const TEMPLATE_KEYS: Record<NotificationChannelType, readonly string[]> =
   telegram: ['text'],
   ntfy: ['text'],
   pushover: ['text'],
+  twilio: ['text'],
 }
 
 const MAX_OVERRIDE_TEXT = 10_000

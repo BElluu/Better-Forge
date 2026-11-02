@@ -11,6 +11,7 @@ export const CHANNEL_SECRETS: Readonly<Record<string, readonly SecretField[]>> =
   telegram: [{ path: ['botToken'], tail: true }],
   ntfy: [{ path: ['accessToken'], tail: true }],
   pushover: [{ path: ['appToken'], tail: true }],
+  twilio: [{ path: ['authToken'], tail: true }],
 }
 
 /**

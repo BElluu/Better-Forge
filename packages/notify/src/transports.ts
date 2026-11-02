@@ -128,6 +128,11 @@ const HEADER_SAFE_TOKEN = /^[\x21-\x7e]+$/
 const NTFY_PRIORITY: Record<NoticeSeverity, number> = { critical: 4, warning: 3, ok: 3 }
 const NTFY_TAGS: Record<NoticeSeverity, string> = { critical: 'rotating_light', warning: 'warning', ok: 'white_check_mark' }
 
+const TWILIO_API = 'https://api.twilio.com/2010-04-01/Accounts'
+/** Three SMS segments; a longer text is cut rather than split into a bill. */
+const TWILIO_MAX_SMS = 480
+const TWILIO_E164 = /^\+[1-9]\d{6,14}$/
+
 const PUSHOVER_URL = 'https://api.pushover.net/1/messages.json'
 const PUSHOVER_MAX_MESSAGE = 1024
 /** Pushover priority 1 is high: it bypasses the recipient's quiet hours. Only a critical event gets it. */
@@ -141,6 +146,7 @@ const SLACK_COLORS: Record<NoticeSeverity, string> = { critical: '#E53935', warn
 
 interface TelegramConfig { botToken?: string; vault?: VaultRef; chatId: string; text?: string }
 interface NtfyConfig { serverUrl?: string; topic: string; accessToken?: string; vault?: VaultRef; text?: string }
+interface TwilioConfig { accountSid: string; authToken?: string; vault?: VaultRef; from: string; to: string; mode?: 'sms' | 'call'; text?: string }
 interface PushoverConfig { appToken?: string; vault?: VaultRef; userKey: string; text?: string }
 
 type Vars = Record<string, string>
@@ -329,6 +335,27 @@ export function createTransports(options: TransportOptions) {
     await failOnHttpError(res, 'Pushover', (j) => Array.isArray(j['errors']) ? j['errors'].filter((e) => typeof e === 'string').join('; ') : '')
   }
 
+  async function sendTwilio(config: TwilioConfig, vars: Vars, notice: Notice) {
+    const token = await resolveToken(config.authToken, config.vault, 'Twilio vault secret has no auth token: use a value secret')
+    // The recipient may be filled in per event; whatever comes out has to be a number, never a header or a path.
+    const to = substituteVars(config.to, vars).trim()
+    if (!TWILIO_E164.test(to)) throw new Error('The recipient is not a phone number in international format')
+    const { title, body } = plainAlert(notice, vars, config.text, TWILIO_MAX_SMS)
+    const call = config.mode === 'call'
+    const form = new URLSearchParams({ To: to, From: config.from.trim() })
+    if (call) form.set('Twiml', `<Response><Say>${escapeHtml(clip(`${title}. ${body.replaceAll('\n', '. ')}`, TWILIO_MAX_SMS))}</Say></Response>`)
+    else form.set('Body', clip(`${title}\n${body}`, TWILIO_MAX_SMS))
+    const sid = config.accountSid.trim()
+    const res = await fetch(`${TWILIO_API}/${encodeURIComponent(sid)}/${call ? 'Calls' : 'Messages'}.json`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded', Authorization: `Basic ${Buffer.from(`${sid}:${token}`).toString('base64')}` },
+      body: form,
+      signal: AbortSignal.timeout(OUTBOUND_TIMEOUT_MS),
+      redirect: 'error',
+    })
+    await failOnHttpError(res, 'Twilio', (j) => typeof j['message'] === 'string' ? j['message'] : '')
+  }
+
   /** Sends one event through the channel; throws when the channel type is unknown or the send fails. */
   async function deliver(channel: TransportChannel, vars: Vars, notice: Notice): Promise<void> {
     const config = configForEvent(channel.type, JSON.parse(channel.config) as Record<string, unknown>, vars['event_type'], options.wording)
@@ -341,6 +368,7 @@ export function createTransports(options: TransportOptions) {
       case 'telegram': return sendTelegram(config as unknown as TelegramConfig, vars, notice)
       case 'ntfy': return sendNtfy(config as unknown as NtfyConfig, vars, notice)
       case 'pushover': return sendPushover(config as unknown as PushoverConfig, vars, notice)
+      case 'twilio': return sendTwilio(config as unknown as TwilioConfig, vars, notice)
       default: throw new Error(`Unsupported notification channel type: ${channel.type}`)
     }
   }
