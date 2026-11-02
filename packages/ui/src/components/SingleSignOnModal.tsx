@@ -4,6 +4,7 @@ import { uiConfig } from '../config'
 import { Alert, ErrorState, Field, LoadingState, Switch, useToast } from './ui'
 import { ModalFooter, ModalHeader, ModalShell } from './ModalShell'
 import { SsoConfirmationNote, isSsoSession, useSsoConfirmation } from './SsoConfirmation'
+import { uiText } from '../config'
 
 interface OidcSettings {
   enabled: boolean
@@ -40,10 +41,10 @@ export function SingleSignOnModal({ onClose }: { onClose: () => void }) {
   useEffect(() => { void load() }, [load])
 
   if (!data || !form) {
-    return <ModalShell align="top" onClose={onClose} label="Single sign-on">
+    return <ModalShell align="top" onClose={onClose} label={uiText('Single sign-on')}>
       <div className="rounded-2xl p-6 w-full max-w-2xl" style={CARD}>
-        {loadError ? <ErrorState message={loadError} onRetry={() => void load()} /> : <LoadingState label="Loading sign-in settings…" />}
-        {loadError && <button type="button" className="btn btn-secondary mt-4" onClick={onClose}>Close</button>}
+        {loadError ? <ErrorState message={loadError} onRetry={() => void load()} /> : <LoadingState label={uiText('Loading sign-in settings…')} />}
+        {loadError && <button type="button" className="btn btn-secondary mt-4" onClick={onClose}>{uiText('Close')}</button>}
       </div>
     </ModalShell>
   }
@@ -71,32 +72,32 @@ export function SingleSignOnModal({ onClose }: { onClose: () => void }) {
     } catch (err) { setMessage({ tone: 'error', text: errorText(err) }); setBusy(null) }
   }
 
-  return <ModalShell align="top" onClose={busy ? undefined : onClose} label="Single sign-on">
+  return <ModalShell align="top" onClose={busy ? undefined : onClose} label={uiText('Single sign-on')}>
     <div className="w-full max-w-2xl rounded-2xl my-8" style={{ background: 'var(--m3-surface-container-low)', border: '1px solid var(--m3-outline-variant)', color: 'var(--m3-on-surface)' }}>
-    <ModalHeader icon="passkey" title="Single sign-on" onClose={onClose} />
+    <ModalHeader icon="passkey" title={uiText('Single sign-on')} onClose={onClose} />
     <form onSubmit={(e) => { e.preventDefault(); void save() }}>
     <div className="p-6 space-y-5">
-      {locked && <Alert tone="warning">Single sign-on is configured through OIDC_* environment variables on the server. Remove them to manage it here.</Alert>}
+      {locked && <Alert tone="warning">{uiText('Single sign-on is configured through OIDC_* environment variables on the server. Remove them to manage it here.')}</Alert>}
       {message && <Alert tone={message.tone} onDismiss={() => setMessage(null)}>{message.text}</Alert>}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="font-headline text-base font-semibold">OpenID Connect</h2>
+          <h2 className="font-headline text-base font-semibold">{uiText('OpenID Connect')}</h2>
           <p className="text-sm mt-1" style={{ color: 'var(--m3-secondary)' }}>
             Users must already exist; they are matched by the verified email from the identity provider.{uiConfig().texts.ssoSignInHint ? ` ${uiConfig().texts.ssoSignInHint}` : ""}
           </p>
         </div>
-        <Switch checked={form.enabled} disabled={locked} onChange={(enabled) => update({ enabled })} aria-label="Enable single sign-on" />
+        <Switch checked={form.enabled} disabled={locked} onChange={(enabled) => update({ enabled })} aria-label={uiText('Enable single sign-on')} />
       </div>
 
       <fieldset disabled={locked || busy !== null} className="space-y-4">
-        <Field label="Issuer URL" hint="For example https://login.microsoftonline.com/<tenant>/v2.0 or https://keycloak.example.com/realms/main">
-          <input className="input-m3" value={form.issuer} onChange={(e) => update({ issuer: e.target.value })} placeholder="https://idp.example.com" />
+        <Field label={uiText('Issuer URL')} hint={uiText('For example https://login.microsoftonline.com/<tenant>/v2.0 or https://keycloak.example.com/realms/main')}>
+          <input className="input-m3" value={form.issuer} onChange={(e) => update({ issuer: e.target.value })} placeholder={uiText('https://idp.example.com')} />
         </Field>
         <div className="grid gap-4 md:grid-cols-2">
-          <Field label="Client ID">
+          <Field label={uiText('Client ID')}>
             <input className="input-m3" value={form.clientId} onChange={(e) => update({ clientId: e.target.value })} autoComplete="off" />
           </Field>
-          <Field label="Client secret" hint={form.hasClientSecret ? 'A secret is stored. Leave empty to keep it. Re-enter it when you change the issuer URL or client ID.' : 'Optional for public clients.'}>
+          <Field label={uiText('Client secret')} hint={form.hasClientSecret ? 'A secret is stored. Leave empty to keep it. Re-enter it when you change the issuer URL or client ID.' : 'Optional for public clients.'}>
             <input
               className="input-m3" type="password" autoComplete="new-password" value={clientSecret}
               onChange={(e) => setClientSecret(e.target.value)}
@@ -104,15 +105,15 @@ export function SingleSignOnModal({ onClose }: { onClose: () => void }) {
             />
           </Field>
         </div>
-        <Field label="Redirect URI" hint={redirectUri ? <>Register <code>{redirectUri}</code> as the callback URL in your identity provider.</> : 'Set PUBLIC_URL on the server or enter the callback URL here.'}>
+        <Field label={uiText('Redirect URI')} hint={redirectUri ? <>Register <code>{redirectUri}</code> as the callback URL in your identity provider.</> : 'Set PUBLIC_URL on the server or enter the callback URL here.'}>
           <input className="input-m3" value={form.redirectUri} onChange={(e) => update({ redirectUri: e.target.value })} placeholder={data.defaultRedirectUri} />
         </Field>
         <div className="grid gap-4 md:grid-cols-2">
-          <Field label="Scopes">
-            <input className="input-m3" value={form.scopes} onChange={(e) => update({ scopes: e.target.value })} placeholder="openid email profile" />
+          <Field label={uiText('Scopes')}>
+            <input className="input-m3" value={form.scopes} onChange={(e) => update({ scopes: e.target.value })} placeholder={uiText('openid email profile')} />
           </Field>
-          <Field label="Button label">
-            <input className="input-m3" value={form.buttonLabel} onChange={(e) => update({ buttonLabel: e.target.value })} placeholder="Sign in with SSO" />
+          <Field label={uiText('Button label')}>
+            <input className="input-m3" value={form.buttonLabel} onChange={(e) => update({ buttonLabel: e.target.value })} placeholder={uiText('Sign in with SSO')} />
           </Field>
         </div>
         <label className="flex items-start gap-2 text-sm">
@@ -121,18 +122,18 @@ export function SingleSignOnModal({ onClose }: { onClose: () => void }) {
         </label>
         <label className="flex items-start gap-2 text-sm">
           <input type="checkbox" className="mt-1" checked={form.disablePasswordLogin} onChange={(e) => update({ disablePasswordLogin: e.target.checked })} />
-          <span>Disable password sign-in. The identity provider must be reachable to save this. Set <code>OIDC_FORCE_PASSWORD_LOGIN=true</code> on the server to recover if it goes down.</span>
+          <span>Disable password sign-in. The identity provider must be reachable to save this. Set <code>{uiText('OIDC_FORCE_PASSWORD_LOGIN=true')}</code> on the server to recover if it goes down.</span>
         </label>
       </fieldset>
 
       {!locked && <>
         {sso
           ? <SsoConfirmationNote confirmation={confirmation} />
-          : <Field label="Your current password" hint="Required to change sign-in settings.">
+          : <Field label={uiText('Your current password')} hint={uiText('Required to change sign-in settings.')}>
             <input className="input-m3" type="password" autoComplete="current-password" required value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
           </Field>}
       </>}
-      {!locked && <p className="text-xs" style={{ color: 'var(--m3-secondary)' }}>Test sign-in uses the saved settings, so save changes first.</p>}
+      {!locked && <p className="text-xs" style={{ color: 'var(--m3-secondary)' }}>{uiText('Test sign-in uses the saved settings, so save changes first.')}</p>}
     </div>
 
     <ModalFooter
@@ -145,7 +146,7 @@ export function SingleSignOnModal({ onClose }: { onClose: () => void }) {
         <button
           type="button" disabled={!locked && (busy !== null || !data.settings.issuer || !data.settings.clientId)}
           onClick={() => window.open('/api/v1/admin/oidc/test-sign-in', '_blank', 'noopener')}
-          title="Signs in at the identity provider in a new tab with the saved settings and shows the claims and the outcome, without signing anyone in."
+          title={uiText('Signs in at the identity provider in a new tab with the saved settings and shows the claims and the outcome, without signing anyone in.')}
           className="btn btn-secondary"
         >
           Test sign-in

@@ -5,6 +5,7 @@ import { api } from '../api/client'
 import { EmptyState, EmptyStateLink, ErrorState, LoadingState, PageContainer, PageHeader, Pagination, ResizeHandle } from '../components/ui'
 import { useDebouncedValue } from '../hooks/useDebouncedValue'
 import type { AuditAction, AuditLogEntry } from '@better-forge/contracts'
+import { uiText } from '../config'
 
 /** How an application names the things its audit log is about: labels and icons by type, and the sections of the filter. */
 export interface AuditEntities {
@@ -48,9 +49,9 @@ function DiffView({ diff }: { diff: Record<string, unknown> }) {
       <table style={{ borderCollapse: 'collapse', fontSize: '11px', width: '100%' }}>
         <thead>
           <tr>
-            <th style={{ textAlign: 'left', padding: '2px 8px 2px 0', color: 'var(--m3-outline)', fontWeight: 600, whiteSpace: 'nowrap' }}>Field</th>
-            <th style={{ textAlign: 'left', padding: '2px 8px', color: 'var(--m3-outline)', fontWeight: 600 }}>Before</th>
-            <th style={{ textAlign: 'left', padding: '2px 0', color: 'var(--m3-outline)', fontWeight: 600 }}>After</th>
+            <th style={{ textAlign: 'left', padding: '2px 8px 2px 0', color: 'var(--m3-outline)', fontWeight: 600, whiteSpace: 'nowrap' }}>{uiText('Field')}</th>
+            <th style={{ textAlign: 'left', padding: '2px 8px', color: 'var(--m3-outline)', fontWeight: 600 }}>{uiText('Before')}</th>
+            <th style={{ textAlign: 'left', padding: '2px 0', color: 'var(--m3-outline)', fontWeight: 600 }}>{uiText('After')}</th>
           </tr>
         </thead>
         <tbody>
@@ -144,7 +145,7 @@ export default function AuditLogPage({ entities }: { entities: AuditEntities }) 
 
   return (
     <PageContainer>
-      <PageHeader title="Audit Log" subtitle={data ? `${data.total} entries` : undefined} />
+      <PageHeader title={uiText('Audit Log')} subtitle={data ? `${data.total} entries` : undefined} />
 
       {/* Filters */}
       <div
@@ -152,20 +153,20 @@ export default function AuditLogPage({ entities }: { entities: AuditEntities }) 
         style={{ background: 'var(--m3-surface-container-low)', border: '1px solid var(--m3-outline-variant)' }}
       >
         <div className="flex flex-col gap-1 min-w-[180px] flex-1">
-          <label htmlFor={`${idPrefix}-user`} className={FILTER_LABEL} style={{ color: 'var(--m3-outline)' }}>User</label>
+          <label htmlFor={`${idPrefix}-user`} className={FILTER_LABEL} style={{ color: 'var(--m3-outline)' }}>{uiText('User')}</label>
           <input
             id={`${idPrefix}-user`}
             value={emailInput}
             onChange={(e) => { setEmailInput(e.target.value); setPage(1) }}
             onKeyDown={(e) => { if (e.key === 'Enter') flushEmail() }}
-            placeholder="Filter by email…"
+            placeholder={uiText('Filter by email…')}
             className="input-sig"
             style={{ height: '36px', fontSize: '13px' }}
           />
         </div>
 
         <div className="flex flex-col gap-1">
-          <label htmlFor={`${idPrefix}-entity`} className={FILTER_LABEL} style={{ color: 'var(--m3-outline)' }}>Entity</label>
+          <label htmlFor={`${idPrefix}-entity`} className={FILTER_LABEL} style={{ color: 'var(--m3-outline)' }}>{uiText('Entity')}</label>
           <select
             id={`${idPrefix}-entity`}
             value={entityType}
@@ -173,7 +174,7 @@ export default function AuditLogPage({ entities }: { entities: AuditEntities }) 
             className="input-sig"
             style={{ height: '36px', fontSize: '13px', width: '180px' }}
           >
-            <option value="">All entities</option>
+            <option value="">{uiText('All entities')}</option>
             {entities.groups.map((group) => (
               <optgroup key={group.label} label={group.label}>
                 {group.types.map((t) => <option key={t} value={t}>{entities.labels[t]}</option>)}
@@ -183,7 +184,7 @@ export default function AuditLogPage({ entities }: { entities: AuditEntities }) 
         </div>
 
         <div className="flex flex-col gap-1">
-          <label htmlFor={`${idPrefix}-action`} className={FILTER_LABEL} style={{ color: 'var(--m3-outline)' }}>Action</label>
+          <label htmlFor={`${idPrefix}-action`} className={FILTER_LABEL} style={{ color: 'var(--m3-outline)' }}>{uiText('Action')}</label>
           <select
             id={`${idPrefix}-action`}
             value={action}
@@ -191,17 +192,17 @@ export default function AuditLogPage({ entities }: { entities: AuditEntities }) 
             className="input-sig"
             style={{ height: '36px', fontSize: '13px', width: '130px' }}
           >
-            <option value="">All actions</option>
-            <option value="create">Create</option>
-            <option value="update">Update</option>
-            <option value="delete">Delete</option>
-            <option value="allow">Allowed</option>
-            <option value="deny">Denied</option>
+            <option value="">{uiText('All actions')}</option>
+            <option value="create">{uiText('Create')}</option>
+            <option value="update">{uiText('Update')}</option>
+            <option value="delete">{uiText('Delete')}</option>
+            <option value="allow">{uiText('Allowed')}</option>
+            <option value="deny">{uiText('Denied')}</option>
           </select>
         </div>
 
         <div className="flex flex-col gap-1">
-          <label htmlFor={`${idPrefix}-from`} className={FILTER_LABEL} style={{ color: 'var(--m3-outline)' }}>From</label>
+          <label htmlFor={`${idPrefix}-from`} className={FILTER_LABEL} style={{ color: 'var(--m3-outline)' }}>{uiText('From')}</label>
           <input
             id={`${idPrefix}-from`}
             type="date"
@@ -213,7 +214,7 @@ export default function AuditLogPage({ entities }: { entities: AuditEntities }) 
         </div>
 
         <div className="flex flex-col gap-1">
-          <label htmlFor={`${idPrefix}-to`} className={FILTER_LABEL} style={{ color: 'var(--m3-outline)' }}>To</label>
+          <label htmlFor={`${idPrefix}-to`} className={FILTER_LABEL} style={{ color: 'var(--m3-outline)' }}>{uiText('To')}</label>
           <input
             id={`${idPrefix}-to`}
             type="date"
@@ -233,7 +234,7 @@ export default function AuditLogPage({ entities }: { entities: AuditEntities }) 
 
       {/* Table */}
       {isLoading ? (
-        <LoadingState label="Loading audit log…" />
+        <LoadingState label={uiText('Loading audit log…')} />
       ) : isError ? (
         <ErrorState message="Could not load the audit log." onRetry={() => void refetch()} />
       ) : (
@@ -264,7 +265,7 @@ export default function AuditLogPage({ entities }: { entities: AuditEntities }) 
                   />
                 </span>
               ))}
-              <span>Details</span>
+              <span>{uiText('Details')}</span>
             </div>
 
             {entries.map((entry) => {
@@ -367,7 +368,7 @@ export default function AuditLogPage({ entities }: { entities: AuditEntities }) 
                 variant="row"
                 className="px-5 py-7"
                 icon="history"
-                title="No audit entries found."
+                title={uiText('No audit entries found.')}
                 description={filtered
                   ? <>Try widening the date range, or <EmptyStateLink onClick={clearFilters}>clear all filters</EmptyStateLink>.</>
                   : 'Changes made in the admin panel and every sign-in, allowed or denied, are recorded here.'}

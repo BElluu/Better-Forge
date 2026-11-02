@@ -5,6 +5,7 @@ import { LoadingState } from '../components/ui/StateViews'
 import { WhatsNew, markWhatsNewSeen, pendingWhatsNew } from '../components/WhatsNew'
 import { useDarkMode } from '../hooks/useDarkMode'
 import { useDatePrefs } from '../lib/dateFormat'
+import { uiText } from '../config'
 
 export interface NavItem {
   to: string
@@ -63,7 +64,7 @@ interface NavContentProps {
 function NavContent({ config, sections, isDark, onToggleDark, onLogout }: NavContentProps) {
   return (
     <>
-      <nav aria-label="Main" className="flex-1 px-3 overflow-y-auto pb-2">
+      <nav aria-label={uiText('Main')} className="flex-1 px-3 overflow-y-auto pb-2">
         {sections.map((section, si) => (
           <div key={section.label} className={si > 0 ? 'mt-4' : ''}>
             <p
@@ -103,7 +104,7 @@ function NavContent({ config, sections, isDark, onToggleDark, onLogout }: NavCon
 
         <Link to={config.settingsPath} className="admin-nav-item">
           <span aria-hidden="true" className="material-symbols-outlined flex-shrink-0" style={ICON_STYLE}>manage_accounts</span>
-          <span className="font-sans">Settings</span>
+          <span className="font-sans">{uiText('Settings')}</span>
         </Link>
 
         <button type="button" onClick={onToggleDark} className="admin-nav-item">
@@ -115,7 +116,7 @@ function NavContent({ config, sections, isDark, onToggleDark, onLogout }: NavCon
 
         <button type="button" onClick={onLogout} className="admin-nav-item admin-nav-danger">
           <span aria-hidden="true" className="material-symbols-outlined flex-shrink-0" style={ICON_STYLE}>logout</span>
-          <span className="font-sans">Logout</span>
+          <span className="font-sans">{uiText('Logout')}</span>
         </button>
       </div>
     </>
@@ -148,13 +149,13 @@ function MobileDrawer({ onClose, returnFocusRef, ...nav }: MobileDrawerProps) {
         id="admin-nav-drawer"
         role="dialog"
         aria-modal="true"
-        aria-label="Navigation"
+        aria-label={uiText('Navigation')}
         className="admin-drawer-panel absolute inset-y-0 left-0 flex flex-col w-72 max-w-[85vw]"
         style={{ background: 'var(--m3-surface-container-low)', boxShadow: '0 8px 32px rgba(0,0,0,0.18)' }}
       >
         <div className="flex items-center justify-between gap-2 px-4 pt-4 mb-4">
           <Brand brand={nav.config.brand} />
-          <button ref={closeRef} type="button" onClick={onClose} aria-label="Close navigation" className="btn-icon">
+          <button ref={closeRef} type="button" onClick={onClose} aria-label={uiText('Close navigation')} className="btn-icon">
             <span aria-hidden="true" className="material-symbols-outlined">close</span>
           </button>
         </div>
@@ -218,7 +219,7 @@ export function createAdminShell(config: AdminShellConfig) {
             ref={menuButtonRef}
             type="button"
             onClick={() => setDrawerPath(location.pathname)}
-            aria-label="Open navigation"
+            aria-label={uiText('Open navigation')}
             aria-expanded={drawerOpen}
             aria-controls="admin-nav-drawer"
             className="btn-icon"

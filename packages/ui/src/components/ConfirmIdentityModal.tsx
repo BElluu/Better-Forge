@@ -2,6 +2,7 @@ import { useId, useState } from 'react'
 import { ModalFooter, ModalHeader, ModalShell } from './ModalShell'
 import { SsoConfirmationNote, isSsoSession, useSsoConfirmation } from './SsoConfirmation'
 import { Alert } from './ui'
+import { uiText } from '../config'
 
 interface ConfirmIdentityModalProps {
   title: string
@@ -57,7 +58,7 @@ export function ConfirmIdentityModal({ title, message, confirmLabel, pendingLabe
           {error && <Alert tone="error">{error}</Alert>}
           {sso ? <SsoConfirmationNote confirmation={ssoConfirmation} /> : (
             <label className="block space-y-2 text-sm" style={{ color: 'var(--m3-on-surface-variant)' }}>
-              <span>Your current password</span>
+              <span>{uiText('Your current password')}</span>
               <input
                 type="password"
                 autoComplete="current-password"
@@ -71,7 +72,7 @@ export function ConfirmIdentityModal({ title, message, confirmLabel, pendingLabe
           )}
         </div>
         <ModalFooter>
-          <button type="button" onClick={onClose} disabled={pending} className="btn btn-secondary">Cancel</button>
+          <button type="button" onClick={onClose} disabled={pending} className="btn btn-secondary">{uiText('Cancel')}</button>
           <button type="submit" disabled={!canConfirm} className={`btn ${danger ? 'btn-danger' : 'btn-primary'}`}>
             {pending ? pendingLabel : confirmLabel}
           </button>

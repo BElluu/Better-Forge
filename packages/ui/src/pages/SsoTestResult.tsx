@@ -4,6 +4,7 @@ import { api } from '../api/client'
 import { uiConfig } from '../config'
 import { Alert, ErrorState, LoadingState, PageContainer, PageHeader, DataTable, DataTh } from '../components/ui'
 import { formatDateTime } from '../lib/dateFormat'
+import { uiText } from '../config'
 
 interface TestResult {
   issuer: string
@@ -23,13 +24,13 @@ function formatClaim(value: unknown) {
 
 function Outcome({ result }: { result: TestResult }) {
   if (result.outcome === 'sign_in') {
-    return <Alert tone="success" title="Sign-in would succeed">Signs in as <strong>{result.user}</strong>, matched by their linked identity-provider account.</Alert>
+    return <Alert tone="success" title={uiText('Sign-in would succeed')}>Signs in as <strong>{result.user}</strong>, matched by their linked identity-provider account.</Alert>
   }
   if (result.outcome === 'link') {
-    return <Alert tone="success" title="Sign-in would succeed">Signs in as <strong>{result.user}</strong>, matched by email. The first real sign-in links this identity-provider account to the user.</Alert>
+    return <Alert tone="success" title={uiText('Sign-in would succeed')}>Signs in as <strong>{result.user}</strong>, matched by email. The first real sign-in links this identity-provider account to the user.</Alert>
   }
   if (result.outcome === 'provision') {
-    return <Alert tone="success" title="Sign-in would succeed">{newAccountNote(result.user)}</Alert>
+    return <Alert tone="success" title={uiText('Sign-in would succeed')}>{newAccountNote(result.user)}</Alert>
   }
   return (
     <Alert tone="error" title={`Sign-in would be refused (${result.denial?.code})`}>
@@ -57,11 +58,11 @@ export default function SsoTestResultPage() {
   return (
     <PageContainer className="max-w-3xl">
       <PageHeader
-        title="Single sign-on test"
+        title={uiText('Single sign-on test')}
         subtitle="Nobody was signed in and nothing was saved. Close this tab when you are done."
       />
       {!id ? <ErrorState message="No test result to show. Start a test sign-in from Users → Single sign-on." />
-        : isLoading ? <LoadingState label="Loading the test result…" />
+        : isLoading ? <LoadingState label={uiText('Loading the test result…')} />
           : error || !data ? <ErrorState message={error instanceof Error ? error.message : 'Could not load the test result.'} />
             : (
               <>
@@ -72,7 +73,7 @@ export default function SsoTestResultPage() {
                 {ordered.length > 0 && (
                   <div className="rounded-2xl overflow-x-auto" style={{ background: 'var(--m3-surface-container-low)', border: '1px solid var(--m3-outline-variant)' }}>
                     <DataTable className="w-full text-sm">
-                      <caption className="sr-only">ID token claims</caption>
+                      <caption className="sr-only">{uiText('ID token claims')}</caption>
                       <thead>
                         <tr style={{ borderBottom: '1px solid var(--m3-outline-variant)' }}>
                           {['Claim', 'Value'].map((h) => (

@@ -9,6 +9,7 @@ import { ModalFooter, ModalHeader, ModalShell } from '../components/ModalShell'
 import { CopyButton } from '../components/CopyButton'
 import { Alert, EmptyStateLink, EmptyTableRow, ErrorState, LoadingState, PageContainer, PageHeader, useToast, DataTable, DataTh, useTableSort } from '../components/ui'
 import { formatDate } from '../lib/dateFormat'
+import { uiText } from '../config'
 
 interface ApiToken {
   id: number
@@ -99,7 +100,7 @@ export default function ApiTokensPage({ resources, presets, actions }: { resourc
     },
     onError: (err) => {
       setRevokeTarget(null)
-      toast.error(errorMessage(err, 'Failed to revoke token'))
+      toast.error(errorMessage(err, uiText('Failed to revoke token')))
     },
   })
 
@@ -129,7 +130,7 @@ export default function ApiTokensPage({ resources, presets, actions }: { resourc
   return (
     <PageContainer>
       <PageHeader
-        title="API tokens"
+        title={uiText('API tokens')}
         subtitle={isLoading || isError ? undefined : `${tokens.length} token${tokens.length !== 1 ? 's' : ''}`}
         actions={
           <>
@@ -148,28 +149,28 @@ export default function ApiTokensPage({ resources, presets, actions }: { resourc
       </p>
 
       {showCreate && (
-        <ModalShell align="top" onClose={() => setShowCreate(false)} label="New token">
+        <ModalShell align="top" onClose={() => setShowCreate(false)} label={uiText('New token')}>
         <div className="rounded-2xl w-full max-w-2xl my-8" style={{ background: 'var(--m3-surface-container-low)', border: '1px solid var(--m3-outline-variant)' }}>
-        <ModalHeader icon="key" title="New token" onClose={() => setShowCreate(false)} />
+        <ModalHeader icon="key" title={uiText('New token')} onClose={() => setShowCreate(false)} />
         <form onSubmit={(e) => { e.preventDefault(); if (canCreate) setConfirming(true) }}>
         <div className="p-4 sm:p-6">
-          <label htmlFor={nameInputId} className="block text-xs mb-1.5" style={{ color: 'var(--m3-secondary)' }}>Name</label>
+          <label htmlFor={nameInputId} className="block text-xs mb-1.5" style={{ color: 'var(--m3-secondary)' }}>{uiText('Name')}</label>
           <div className="flex flex-wrap gap-3">
             <input
               id={nameInputId}
               value={name}
               onChange={(e) => setName(e.target.value)}
               maxLength={80}
-              placeholder="GitHub Actions"
+              placeholder={uiText('GitHub Actions')}
               className="input-sig flex-1 min-w-[200px]"
             />
-            <select aria-label="Expires" value={expiresInDays} onChange={(e) => setExpiresInDays(e.target.value)} className="input-sig w-auto">
+            <select aria-label={uiText('Expires')} value={expiresInDays} onChange={(e) => setExpiresInDays(e.target.value)} className="input-sig w-auto">
               {EXPIRIES.map((x) => <option key={x.value} value={x.value}>{x.label}</option>)}
             </select>
           </div>
 
           <fieldset className="mt-4">
-            <legend className="text-xs mb-1.5" style={{ color: 'var(--m3-secondary)' }}>Permissions</legend>
+            <legend className="text-xs mb-1.5" style={{ color: 'var(--m3-secondary)' }}>{uiText('Permissions')}</legend>
             <div className="flex flex-wrap gap-2 mb-3">
               {presets.map((preset) => (
                 <button
@@ -182,15 +183,15 @@ export default function ApiTokensPage({ resources, presets, actions }: { resourc
                   {preset.label}
                 </button>
               ))}
-              <button type="button" onClick={() => setScopes([])} className="btn btn-ghost btn-sm">Clear</button>
+              <button type="button" onClick={() => setScopes([])} className="btn btn-ghost btn-sm">{uiText('Clear')}</button>
             </div>
             <div className="rounded-xl overflow-x-auto" style={{ border: '1px solid var(--m3-outline-variant)' }}>
               <table className="w-full min-w-[480px] text-sm">
                 <thead>
                   <tr style={{ background: 'var(--m3-surface-container)' }}>
-                    <th className="px-4 py-2 text-left font-mono text-xs uppercase tracking-wider" style={{ color: 'var(--m3-secondary)' }}>Part</th>
-                    <th className="px-4 py-2 w-20 font-mono text-xs uppercase tracking-wider" style={{ color: 'var(--m3-secondary)' }}>Read</th>
-                    <th className="px-4 py-2 w-20 font-mono text-xs uppercase tracking-wider" style={{ color: 'var(--m3-secondary)' }}>Write</th>
+                    <th className="px-4 py-2 text-left font-mono text-xs uppercase tracking-wider" style={{ color: 'var(--m3-secondary)' }}>{uiText('Part')}</th>
+                    <th className="px-4 py-2 w-20 font-mono text-xs uppercase tracking-wider" style={{ color: 'var(--m3-secondary)' }}>{uiText('Read')}</th>
+                    <th className="px-4 py-2 w-20 font-mono text-xs uppercase tracking-wider" style={{ color: 'var(--m3-secondary)' }}>{uiText('Write')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -236,7 +237,7 @@ export default function ApiTokensPage({ resources, presets, actions }: { resourc
         </div>
 
         <ModalFooter>
-          <button type="button" onClick={() => setShowCreate(false)} className="btn btn-secondary">Cancel</button>
+          <button type="button" onClick={() => setShowCreate(false)} className="btn btn-secondary">{uiText('Cancel')}</button>
           <button type="submit" disabled={!canCreate} className="btn btn-primary">
             Create
           </button>
@@ -248,9 +249,9 @@ export default function ApiTokensPage({ resources, presets, actions }: { resourc
 
       {confirming && (
         <ConfirmIdentityModal
-          title="Create token"
+          title={uiText('Create token')}
           message="A token can act on the admin API without you being signed in. Confirm it's you to create it."
-          confirmLabel="Create token"
+          confirmLabel={uiText('Create token')}
           pendingLabel="Creating…"
           action={createToken}
           onClose={() => setConfirming(false)}
@@ -275,7 +276,7 @@ export default function ApiTokensPage({ resources, presets, actions }: { resourc
       )}
 
       {isLoading ? (
-        <LoadingState label="Loading tokens…" />
+        <LoadingState label={uiText('Loading tokens…')} />
       ) : isError ? (
         <ErrorState message="Could not load tokens." onRetry={() => void refetch()} />
       ) : (
@@ -291,7 +292,7 @@ export default function ApiTokensPage({ resources, presets, actions }: { resourc
                     className={`px-4 py-3 font-mono text-xs uppercase tracking-wider ${h === '' ? 'text-right' : 'text-left'}`}
                     style={{ color: 'var(--m3-secondary)', background: 'var(--m3-surface-container)' }}
                   >
-                    {h === '' ? <span className="sr-only">Actions</span> : h}
+                    {h === '' ? <span className="sr-only">{uiText('Actions')}</span> : h}
                   </DataTh>
                 ))}
               </tr>
@@ -319,7 +320,7 @@ export default function ApiTokensPage({ resources, presets, actions }: { resourc
                       <button
                         type="button"
                         onClick={() => setRevokeTarget(token)}
-                        title="Revoke token"
+                        title={uiText('Revoke token')}
                         aria-label={`Revoke ${token.name}`}
                         className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors text-xs focus-ring"
                         style={{ color: 'var(--m3-secondary)' }}
@@ -336,8 +337,8 @@ export default function ApiTokensPage({ resources, presets, actions }: { resourc
                 <EmptyTableRow
                   colSpan={7}
                   icon="key"
-                  title="No API tokens yet."
-                  description={<><EmptyStateLink onClick={openCreate}>Create a token</EmptyStateLink> to call the admin API from scripts and CI.</>}
+                  title={uiText('No API tokens yet.')}
+                  description={<><EmptyStateLink onClick={openCreate}>{uiText('Create a token')}</EmptyStateLink> to call the admin API from scripts and CI.</>}
                 />
               )}
             </tbody>
@@ -347,9 +348,9 @@ export default function ApiTokensPage({ resources, presets, actions }: { resourc
 
       {revokeTarget && (
         <ConfirmModal
-          title="Revoke token"
+          title={uiText('Revoke token')}
           message={`Revoke "${revokeTarget.name}"? Anything still using it stops working immediately.`}
-          confirmLabel="Revoke"
+          confirmLabel={uiText('Revoke')}
           pending={revokeMutation.isPending}
           pendingLabel="Revoking…"
           onConfirm={() => revokeMutation.mutate(revokeTarget.id)}

@@ -7,6 +7,7 @@ import { CopyButton } from '../components/CopyButton'
 import { SsoConfirmationNote, isSsoSession, useSsoConfirmation } from '../components/SsoConfirmation'
 import { Alert, PageContainer, PageHeader } from '../components/ui'
 import { DATE_FORMATS, TIME_FORMATS, formatDateTime, setDatePrefs, useDatePrefs, type DateFormat, type TimeFormat } from '../lib/dateFormat'
+import { uiText } from '../config'
 
 interface TwoFactorSetup {
   secret: string
@@ -119,7 +120,7 @@ export default function SettingsPage() {
 
   return (
     <PageContainer>
-      <PageHeader title="Settings" subtitle="Manage your account and sign-in security" />
+      <PageHeader title={uiText('Settings')} subtitle="Manage your account and sign-in security" />
 
       {(error || message) && (
         <Alert tone={error ? 'error' : 'success'} className="max-w-2xl">{error || message}</Alert>
@@ -127,14 +128,14 @@ export default function SettingsPage() {
 
       <div className="grid gap-6 xl:grid-cols-3 max-w-7xl">
         <section className="rounded-2xl p-6" style={{ background: 'var(--m3-surface-container-low)', border: '1px solid var(--m3-outline-variant)' }}>
-          <h2 className="font-headline font-semibold text-lg mb-1">Change password</h2>
-          <p className="text-sm mb-5" style={{ color: 'var(--m3-secondary)' }}>Changing your password signs out every other active session.</p>
+          <h2 className="font-headline font-semibold text-lg mb-1">{uiText('Change password')}</h2>
+          <p className="text-sm mb-5" style={{ color: 'var(--m3-secondary)' }}>{uiText('Changing your password signs out every other active session.')}</p>
           <form onSubmit={(event) => { event.preventDefault(); void changePassword() }} className="space-y-4">
             {sso
               ? <SsoConfirmationNote confirmation={confirmation} />
-              : <PasswordField label="Current password" value={current} onChange={setCurrent} placeholder="Enter current password" />}
-            <PasswordField label="New password" value={password} onChange={setPassword} placeholder="Minimum 8 characters" minLength={8} />
-            <PasswordField label="Confirm new password" value={confirm} onChange={setConfirm} placeholder="Repeat the new password" />
+              : <PasswordField label={uiText('Current password')} value={current} onChange={setCurrent} placeholder={uiText('Enter current password')} />}
+            <PasswordField label={uiText('New password')} value={password} onChange={setPassword} placeholder={uiText('Minimum 8 characters')} minLength={8} />
+            <PasswordField label={uiText('Confirm new password')} value={confirm} onChange={setConfirm} placeholder={uiText('Repeat the new password')} />
             <button type="submit" disabled={loading} className="btn btn-primary">
               {loading ? 'Saving…' : 'Update password'}
             </button>
@@ -142,27 +143,27 @@ export default function SettingsPage() {
         </section>
         <section className="rounded-2xl p-6" style={{ background: 'var(--m3-surface-container-low)', border: '1px solid var(--m3-outline-variant)' }}>
           <div className="flex items-center justify-between gap-3 mb-1">
-            <h2 className="font-headline font-semibold text-lg">Two-factor authentication</h2>
+            <h2 className="font-headline font-semibold text-lg">{uiText('Two-factor authentication')}</h2>
             <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{
               background: twoFactorEnabled ? 'var(--m3-up-bg)' : 'var(--m3-surface-container-high)',
               color: twoFactorEnabled ? 'var(--m3-up)' : 'var(--m3-secondary)',
             }}>{twoFactorEnabled ? 'Enabled' : 'Disabled'}</span>
           </div>
-          <p className="text-sm mb-5" style={{ color: 'var(--m3-secondary)' }}>Use any TOTP authenticator application. Recovery codes work once each.</p>
+          <p className="text-sm mb-5" style={{ color: 'var(--m3-secondary)' }}>{uiText('Use any TOTP authenticator application. Recovery codes work once each.')}</p>
 
           {!twoFactorEnabled && !setup && recoveryCodes.length === 0 && (
             <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); void beginTwoFactorSetup() }}>
               {sso
                 ? <SsoConfirmationNote confirmation={confirmation} />
-                : <PasswordField label="Current password" value={securityPassword} onChange={setSecurityPassword} placeholder="Confirm your password" />}
-              <button type="submit" disabled={loading || (!sso && !securityPassword)} className="btn btn-primary">Set up 2FA</button>
+                : <PasswordField label={uiText('Current password')} value={securityPassword} onChange={setSecurityPassword} placeholder={uiText('Confirm your password')} />}
+              <button type="submit" disabled={loading || (!sso && !securityPassword)} className="btn btn-primary">{uiText('Set up 2FA')}</button>
             </form>
           )}
 
           {setup && (
             <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); void enableTwoFactor() }}>
               <div className="rounded-xl p-5 flex flex-col items-center text-center" style={{ background: 'var(--m3-surface-container)' }}>
-                <p className="text-sm font-semibold mb-3">Scan this QR code with your authenticator app</p>
+                <p className="text-sm font-semibold mb-3">{uiText('Scan this QR code with your authenticator app')}</p>
                 <img
                   src={setup.qrDataUrl}
                   alt="QR code for two-factor authentication setup"
@@ -172,26 +173,26 @@ export default function SettingsPage() {
                   style={{ background: '#ffffff' }}
                 />
                 <details className="w-full mt-4 text-left">
-                  <summary className="text-sm cursor-pointer" style={{ color: 'var(--m3-secondary)' }}>Cannot scan the QR code?</summary>
-                  <p className="text-xs mt-3 mb-2" style={{ color: 'var(--m3-secondary)' }}>Enter this setup key manually:</p>
+                  <summary className="text-sm cursor-pointer" style={{ color: 'var(--m3-secondary)' }}>{uiText('Cannot scan the QR code?')}</summary>
+                  <p className="text-xs mt-3 mb-2" style={{ color: 'var(--m3-secondary)' }}>{uiText('Enter this setup key manually:')}</p>
                   <code className="block text-sm break-all select-all">{setup.secret}</code>
-                  <a href={setup.uri} className="inline-block text-sm mt-3 underline">Open in authenticator app</a>
+                  <a href={setup.uri} className="inline-block text-sm mt-3 underline">{uiText('Open in authenticator app')}</a>
                 </details>
               </div>
-              <TextField label="Authentication code" value={code} onChange={setCode} placeholder="123456" autoComplete="one-time-code" inputMode="numeric" />
-              <button type="submit" disabled={loading || !code} className="btn btn-primary">Verify and enable</button>
+              <TextField label={uiText('Authentication code')} value={code} onChange={setCode} placeholder={uiText('123456')} autoComplete="one-time-code" inputMode="numeric" />
+              <button type="submit" disabled={loading || !code} className="btn btn-primary">{uiText('Verify and enable')}</button>
             </form>
           )}
 
           {recoveryCodes.length > 0 && (
             <div className="space-y-4">
               <div className="rounded-xl p-4" style={{ background: 'var(--m3-surface-container)' }}>
-                <p className="text-sm font-semibold mb-3">Recovery codes — store them somewhere safe</p>
+                <p className="text-sm font-semibold mb-3">{uiText('Recovery codes — store them somewhere safe')}</p>
                 <div className="grid grid-cols-2 gap-2 font-mono text-sm select-all">
                   {recoveryCodes.map((recoveryCode) => <code key={recoveryCode}>{recoveryCode}</code>)}
                 </div>
               </div>
-              <CopyButton value={recoveryCodes.join('\n')} label="Copy codes" />
+              <CopyButton value={recoveryCodes.join('\n')} label={uiText('Copy codes')} />
             </div>
           )}
 
@@ -199,24 +200,24 @@ export default function SettingsPage() {
             <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); void disableTwoFactor() }}>
               {sso
                 ? <SsoConfirmationNote confirmation={confirmation} />
-                : <PasswordField label="Current password" value={securityPassword} onChange={setSecurityPassword} placeholder="Confirm your password" />}
-              <TextField label="Authentication or recovery code" value={code} onChange={setCode} placeholder="Code" autoComplete="one-time-code" />
-              <button type="submit" disabled={loading || (!sso && !securityPassword) || !code} className="btn btn-danger-outline">Disable 2FA</button>
+                : <PasswordField label={uiText('Current password')} value={securityPassword} onChange={setSecurityPassword} placeholder={uiText('Confirm your password')} />}
+              <TextField label={uiText('Authentication or recovery code')} value={code} onChange={setCode} placeholder={uiText('Code')} autoComplete="one-time-code" />
+              <button type="submit" disabled={loading || (!sso && !securityPassword) || !code} className="btn btn-danger-outline">{uiText('Disable 2FA')}</button>
             </form>
           )}
         </section>
         <section className="rounded-2xl p-6" style={{ background: 'var(--m3-surface-container-low)', border: '1px solid var(--m3-outline-variant)' }}>
-          <h2 className="font-headline font-semibold text-lg">Date and time format</h2>
+          <h2 className="font-headline font-semibold text-lg">{uiText('Date and time format')}</h2>
           <p className="text-sm mt-1 mb-4" style={{ color: 'var(--m3-secondary)' }}>Applies to this browser only. Now: {formatDateTime(Date.now())}</p>
           <div className="space-y-4">
             <div className="flex flex-col gap-1">
-              <label htmlFor="date-format" className="text-sm font-medium">Date</label>
+              <label htmlFor="date-format" className="text-sm font-medium">{uiText('Date')}</label>
               <select id="date-format" className="input-sig" value={datePrefs.date} onChange={(e) => setDatePrefs({ ...datePrefs, date: e.target.value as DateFormat })}>
                 {DATE_FORMATS.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}
               </select>
             </div>
             <div className="flex flex-col gap-1">
-              <label htmlFor="time-format" className="text-sm font-medium">Time</label>
+              <label htmlFor="time-format" className="text-sm font-medium">{uiText('Time')}</label>
               <select id="time-format" className="input-sig" value={datePrefs.time} onChange={(e) => setDatePrefs({ ...datePrefs, time: e.target.value as TimeFormat })}>
                 {TIME_FORMATS.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}
               </select>
@@ -226,15 +227,15 @@ export default function SettingsPage() {
       </div>
 
       <section className="rounded-2xl p-6 max-w-5xl" style={{ background: 'var(--m3-surface-container-low)', border: '1px solid var(--m3-outline-variant)' }}>
-        <h2 className="font-headline font-semibold text-lg">Active sessions</h2>
-        <p className="text-sm mt-1 mb-4" style={{ color: 'var(--m3-secondary)' }}>Sign out this browser and every other active session for your account.</p>
-        <button type="button" disabled={loading} onClick={() => setConfirmLogoutAll(true)} className="btn btn-danger-outline">Sign out everywhere</button>
+        <h2 className="font-headline font-semibold text-lg">{uiText('Active sessions')}</h2>
+        <p className="text-sm mt-1 mb-4" style={{ color: 'var(--m3-secondary)' }}>{uiText('Sign out this browser and every other active session for your account.')}</p>
+        <button type="button" disabled={loading} onClick={() => setConfirmLogoutAll(true)} className="btn btn-danger-outline">{uiText('Sign out everywhere')}</button>
       </section>
       {confirmLogoutAll && (
         <ConfirmModal
-          title="Sign out everywhere"
+          title={uiText('Sign out everywhere')}
           message="Sign out this browser and every other active session for your account? You will need to sign in again."
-          confirmLabel="Sign out everywhere"
+          confirmLabel={uiText('Sign out everywhere')}
           pending={loading}
           pendingLabel="Signing out…"
           onConfirm={() => void logoutEverywhere()}

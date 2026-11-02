@@ -2,6 +2,7 @@ import { useId, useState } from 'react'
 import { ModalFooter, ModalHeader, ModalShell } from './ModalShell'
 import { SsoConfirmationNote, isSsoSession, type SsoConfirmationState } from './SsoConfirmation'
 import { Alert } from './ui'
+import { uiText } from '../config'
 
 const IDLE_CONFIRMATION = { waiting: false, cancel: () => {} }
 
@@ -34,7 +35,7 @@ export function ResetTwoFactorModal({ email, pending, error, ssoConfirmation = I
         className="rounded-2xl w-full max-w-md"
         style={{ background: 'var(--m3-surface-container-low)', border: '1px solid var(--m3-outline-variant)' }}
       >
-        <ModalHeader icon="shield_lock" titleId={titleId} title="Reset two-factor authentication" onClose={pending ? () => {} : onCancel} />
+        <ModalHeader icon="shield_lock" titleId={titleId} title={uiText('Reset two-factor authentication')} onClose={pending ? () => {} : onCancel} />
         <div className="p-6 space-y-4">
         <div>
           <p className="text-sm" style={{ color: 'var(--m3-on-surface-variant)' }}>
@@ -45,7 +46,7 @@ export function ResetTwoFactorModal({ email, pending, error, ssoConfirmation = I
         {error && <Alert tone="error">{error}</Alert>}
 
         {sso ? <SsoConfirmationNote confirmation={ssoConfirmation} /> : <label className="block space-y-2 text-sm" style={{ color: 'var(--m3-on-surface-variant)' }}>
-          <span>Your current password</span>
+          <span>{uiText('Your current password')}</span>
           <input
             type="password"
             autoComplete="current-password"
@@ -63,7 +64,7 @@ export function ResetTwoFactorModal({ email, pending, error, ssoConfirmation = I
 
         </div>
         <ModalFooter>
-          <button type="button" onClick={onCancel} disabled={pending} className="btn btn-secondary">Cancel</button>
+          <button type="button" onClick={onCancel} disabled={pending} className="btn btn-secondary">{uiText('Cancel')}</button>
           <button type="button" onClick={confirm} disabled={!canConfirm} className="btn btn-danger-outline">
             {pending ? 'Resetting…' : 'Reset 2FA'}
           </button>

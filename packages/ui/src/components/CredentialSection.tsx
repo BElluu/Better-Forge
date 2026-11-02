@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import type { VaultRef } from '@better-forge/contracts'
 import { Field, Note, type VaultPickerProps } from './formParts'
+import { uiText } from '../config'
 
 interface CredentialSectionProps extends VaultPickerProps {
   vault: VaultRef | undefined
@@ -75,7 +76,7 @@ export function CredentialSection({
       {/* Direct input */}
       {!isVault && (
         <>
-          <Note tone="warning">For security, store credentials in Vault rather than entering them directly here.</Note>
+          <Note tone="warning">{uiText('For security, store credentials in Vault rather than entering them directly here.')}</Note>
           {children}
         </>
       )}
@@ -84,7 +85,7 @@ export function CredentialSection({
       {isVault && (
         <div className="space-y-3">
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Vault">
+            <Field label={uiText('Vault')}>
               <select
                 className="input-sig"
                 value={selectedVaultId || ''}
@@ -98,7 +99,7 @@ export function CredentialSection({
                 {vaults.map((v) => <option key={v.id} value={v.id}>{v.name}</option>)}
               </select>
             </Field>
-            <Field label="Secret">
+            <Field label={uiText('Secret')}>
               <select
                 className="input-sig"
                 value={selectedSecretId || ''}
@@ -192,10 +193,10 @@ export function ConnectionStringSection({
 
   return (
     <div className="space-y-3">
-      <Note tone="info">Connection strings contain credentials and must always be stored in Vault.</Note>
+      <Note tone="info">{uiText('Connection strings contain credentials and must always be stored in Vault.')}</Note>
 
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Vault">
+        <Field label={uiText('Vault')}>
           <select
             className="input-sig"
             value={selectedVaultId || ''}
@@ -209,7 +210,7 @@ export function ConnectionStringSection({
             {vaults.map((v) => <option key={v.id} value={v.id}>{v.name}</option>)}
           </select>
         </Field>
-        <Field label="Secret">
+        <Field label={uiText('Secret')}>
           <select
             className="input-sig"
             value={selectedSecretId || ''}
@@ -240,10 +241,10 @@ export function ConnectionStringSection({
 
       {selectedSecret?.type === 'json' && selectedSecretId && (
         <div>
-          <p className="font-mono text-xs uppercase tracking-wider mb-1" style={{ color: 'var(--m3-secondary)' }}>JSON Field Mapping</p>
-          <p className="text-xs mb-3" style={{ color: 'var(--m3-secondary)' }}>Enter the JSON key that holds the connection string.</p>
+          <p className="font-mono text-xs uppercase tracking-wider mb-1" style={{ color: 'var(--m3-secondary)' }}>{uiText('JSON Field Mapping')}</p>
+          <p className="text-xs mb-3" style={{ color: 'var(--m3-secondary)' }}>{uiText('Enter the JSON key that holds the connection string.')}</p>
           <div className="grid items-center gap-3" style={{ gridTemplateColumns: '130px 1fr' }}>
-            <span className="text-xs font-medium" style={{ color: 'var(--m3-on-surface-variant)' }}>Connection String</span>
+            <span className="text-xs font-medium" style={{ color: 'var(--m3-on-surface-variant)' }}>{uiText('Connection String')}</span>
             <input
               className="input-sig text-xs"
               placeholder='JSON key (e.g. "connectionString")'

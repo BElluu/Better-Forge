@@ -4,6 +4,7 @@ import { api, enterAfterSignIn, setSession, type AuthUser } from '../api/client'
 import { uiConfig } from '../config'
 import { useDarkMode } from '../hooks/useDarkMode'
 import { Alert } from '../components/ui'
+import { uiText } from '../config'
 
 interface AuthConfig {
   passwordLogin: boolean
@@ -133,7 +134,7 @@ export default function LoginPage({ headline, tagline, features }: LoginPageProp
           type="button"
           onClick={toggleDark}
           className="btn-icon absolute top-5 right-5 w-9 h-9 rounded-full"
-          aria-label="Toggle dark mode"
+          aria-label={uiText('Toggle dark mode')}
         >
           <span className="material-symbols-outlined" aria-hidden="true">
             {isDark ? 'light_mode' : 'dark_mode'}
@@ -199,7 +200,7 @@ export default function LoginPage({ headline, tagline, features }: LoginPageProp
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   className="input-m3"
-                  placeholder="name@company.com"
+                  placeholder={uiText('name@company.com')}
                 />
               </div>}
 
@@ -244,7 +245,7 @@ export default function LoginPage({ headline, tagline, features }: LoginPageProp
                     required
                     autoFocus
                     className="input-m3"
-                    placeholder="6-digit code or recovery code"
+                    placeholder={uiText('6-digit code or recovery code')}
                   />
                   <button
                     type="button"
