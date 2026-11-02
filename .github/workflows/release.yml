@@ -1,7 +1,7 @@
 name: Release
 
 # A push to main that carries changesets releases the packages: the job raises the versions, commits "Version packages"
-# to main, publishes every package to npm and creates the GitHub release. A push without changesets does nothing.
+# to main, publishes the packages that got a new version to npm and creates a GitHub release for each. A push without changesets does nothing.
 # Quality is checked on the pull request, which the ruleset on main requires, so it is not repeated here.
 #
 # Publishing uses npm trusted publishing: the job proves who it is with an OIDC token, so no npm token is stored.
@@ -64,10 +64,11 @@ jobs:
           if grep -q 'New tag:' publish.log; then echo "published=true" >> "$GITHUB_OUTPUT"; fi
           git push origin --tags
 
-      - name: GitHub release
+      - name: GitHub releases
         if: steps.publish.outputs.published == 'true'
         env:
           GH_TOKEN: ${{ secrets.CHANGESETS_TOKEN }}
         run: |
-          version=$(node -p "require('./packages/contracts/package.json').version")
-          gh release create "v$version" --target "$(git rev-parse HEAD)" --title "v$version" --generate-notes
+          grep 'New tag:' publish.log | sed 's/.*New tag: *//' | while read -r tag; do
+            gh release create "$tag" --target "$(git rev-parse HEAD)" --title "$tag" --generate-notes
+          done

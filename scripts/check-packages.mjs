@@ -1,6 +1,5 @@
 // Checks what a release depends on, so a mistake fails in CI and not on npm:
-//   - every published package has the same version (they are released together);
-//   - a package lists the other @better-forge packages it uses under `dependencies`, with exactly that version, never
+//   - a package lists the other @better-forge packages it uses under `dependencies`, with exactly the version of that package, never
 //     as a peer, and only the ones the module graph in eslint.boundaries.mjs allows;
 //   - a package that is published has the fields npm needs (license, repository, access, files).
 //
@@ -18,8 +17,7 @@ const manifests = fs.readdirSync(path.join(root, 'packages'), { withFileTypes: t
   .filter((entry) => entry.isDirectory())
   .map((entry) => ({ dir: entry.name, manifest: JSON.parse(fs.readFileSync(path.join(root, 'packages', entry.name, 'package.json'), 'utf8')) }))
 
-const versions = new Set(manifests.map(({ manifest }) => manifest.version))
-if (versions.size !== 1) problems.push(`the packages have different versions: ${[...versions].join(', ')}`)
+const versionOf = new Map(manifests.map(({ manifest }) => [manifest.name, manifest.version]))
 
 for (const { dir, manifest } of manifests) {
   const name = manifest.name
@@ -37,7 +35,7 @@ for (const { dir, manifest } of manifests) {
   const allowed = new Set([...(PACKAGE_GRAPH[dir] ?? []), 'contracts'])
   for (const [dep, range] of Object.entries(manifest.dependencies ?? {})) {
     if (!dep.startsWith(`${BETTER_SCOPE}/`)) continue
-    if (range !== manifest.version) problem(name, `${dep} is "${range}", it must be exactly ${manifest.version}`)
+    if (range !== versionOf.get(dep)) problem(name, `${dep} is "${range}", it must be exactly ${versionOf.get(dep)}`)
     if (!allowed.has(dep.slice(BETTER_SCOPE.length + 1))) problem(name, `${dep} is not allowed by PACKAGE_GRAPH`)
   }
 }
@@ -46,4 +44,4 @@ if (problems.length > 0) {
   console.error(problems.join('\n'))
   process.exit(1)
 }
-console.log(`${manifests.length} packages, version ${[...versions][0]}`)
+console.log(`${manifests.length} packages`)
