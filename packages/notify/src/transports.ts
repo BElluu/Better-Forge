@@ -21,9 +21,11 @@ export interface TransportOptions {
   /**
    * Opens the requests to an address the channel's owner typed in (a webhook, a Slack, Discord or Teams URL, an ntfy
    * server of the channel's own), so that a product which must keep them away from some networks passes a fetch that refuses them. The
-   * requests to the fixed hosts of Telegram, Pushover and ntfy.sh use the global fetch. Defaults to the global fetch.
+   * requests to the fixed hosts of Telegram, Pushover, Twilio and ntfy.sh use `serviceFetch`. Defaults to the global fetch.
    */
   fetch?: typeof fetch
+  /** Sends the requests to the fixed hosts of Telegram, Pushover, Twilio and ntfy.sh, e.g. through an outbound proxy. Defaults to the global fetch. */
+  serviceFetch?: typeof fetch
 }
 
 /** The part of a stored channel that picks and configures its transport. */
@@ -157,6 +159,7 @@ type Vars = Record<string, string>
  */
 export function createTransports(options: TransportOptions) {
   const doFetch = options.fetch ?? fetch
+  const serviceFetch = options.serviceFetch ?? fetch
 
   /** A credential typed into the channel, or the `value` secret of its vault reference. */
   async function resolveToken(direct: string | undefined, vault: VaultRef | undefined, vaultProblem: string): Promise<string> {
@@ -282,7 +285,7 @@ export function createTransports(options: TransportOptions) {
 
     // The bot token is part of the URL path. Only the status code and Telegram's own description are reported
     // (the Bot API never echoes the token), so the token never reaches the delivery history.
-    const res = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+    const res = await serviceFetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ chat_id: config.chatId.trim().replace(/^#(?=-?\d)/, ''), text, parse_mode: 'HTML', link_preview_options: { is_disabled: true } }),
@@ -312,7 +315,7 @@ export function createTransports(options: TransportOptions) {
     const target = new URL(customServer || NTFY_DEFAULT_SERVER)
     if (!target.pathname.endsWith('/')) target.pathname += '/'
     // Publishing as JSON to the server root keeps non-ASCII titles intact, which a header-based publish would not.
-    const res = await (customServer ? doFetch : fetch)(target.href, {
+    const res = await (customServer ? doFetch : serviceFetch)(target.href, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
       body: JSON.stringify({ topic: config.topic.trim(), title, message: clipBytes(body, NTFY_MAX_MESSAGE_BYTES), priority: NTFY_PRIORITY[notice.severity], tags: [NTFY_TAGS[notice.severity]] }),
@@ -325,7 +328,7 @@ export function createTransports(options: TransportOptions) {
   async function sendPushover(config: PushoverConfig, vars: Vars, notice: Notice) {
     const token = await resolveToken(config.appToken, config.vault, 'Pushover vault secret has no application token: use a value secret')
     const { title, body } = plainAlert(notice, vars, config.text, PUSHOVER_MAX_MESSAGE)
-    const res = await fetch(PUSHOVER_URL, {
+    const res = await serviceFetch(PUSHOVER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token, user: config.userKey.trim(), title, message: body, priority: PUSHOVER_PRIORITY[notice.severity] }),
@@ -346,7 +349,7 @@ export function createTransports(options: TransportOptions) {
     if (call) form.set('Twiml', `<Response><Say>${escapeHtml(clip(`${title}. ${body.replaceAll('\n', '. ')}`, TWILIO_MAX_SMS))}</Say></Response>`)
     else form.set('Body', clip(`${title}\n${body}`, TWILIO_MAX_SMS))
     const sid = config.accountSid.trim()
-    const res = await fetch(`${TWILIO_API}/${encodeURIComponent(sid)}/${call ? 'Calls' : 'Messages'}.json`, {
+    const res = await serviceFetch(`${TWILIO_API}/${encodeURIComponent(sid)}/${call ? 'Calls' : 'Messages'}.json`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded', Authorization: `Basic ${Buffer.from(`${sid}:${token}`).toString('base64')}` },
       body: form,
