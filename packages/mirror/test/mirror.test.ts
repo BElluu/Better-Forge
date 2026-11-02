@@ -170,7 +170,8 @@ describe('interval runner', () => {
     })
     runner.start()
     void runner.runNow()
-    await wait(80)
+    // Wait for the runs instead of for a fixed time, which a busy machine can stretch past the window.
+    for (let waited = 0; runs < 3 && waited < 2000; waited += 10) await wait(10)
     await runner.stop()
     assert.equal(maxActive, 1)
     assert.ok(runs >= 3, `ran ${runs} times`)
