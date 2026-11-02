@@ -31,6 +31,14 @@ export interface Notice {
   at: string
   /** Names `at` in the footer ("Checked at"). */
   atLabel: string
+  /** Links shown as buttons where a channel has them (Slack, Teams, Telegram, ntfy), as text elsewhere. Only http and https addresses are used. */
+  actions?: NoticeAction[]
+}
+
+/** A button that opens an address. */
+export interface NoticeAction {
+  label: string
+  url: string
 }
 
 /** How a channel writes the emphasised segments of a headline. */

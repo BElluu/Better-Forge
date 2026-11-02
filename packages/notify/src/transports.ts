@@ -143,6 +143,10 @@ const PUSHOVER_PRIORITY: Record<NoticeSeverity, number> = { critical: 1, warning
 /** Discord refuses an embed field value of more than 1024 characters. */
 const DISCORD_MAX_FIELD_VALUE = 1024
 const DISCORD_COLORS: Record<NoticeSeverity, number> = { critical: 0xe53935, warning: 0xfb8c00, ok: 0x43a047 }
+/** The buttons of a notice: only web addresses, because a channel would show anything else as a clickable link too. */
+const webActions = (notice: Notice): { label: string; url: string }[] =>
+  (notice.actions ?? []).filter((action) => action.label.trim() !== '' && /^https?:\/\/\S+$/i.test(action.url)).slice(0, 5)
+
 const TEAMS_COLORS: Record<NoticeSeverity, string> = { critical: 'E53935', warning: 'FB8C00', ok: '43A047' }
 const SLACK_COLORS: Record<NoticeSeverity, string> = { critical: '#E53935', warning: '#FB8C00', ok: '#43A047' }
 
@@ -233,6 +237,7 @@ export function createTransports(options: TransportOptions) {
         facts,
         markdown: true,
       }],
+      ...(webActions(notice).length > 0 ? { potentialAction: webActions(notice).map((action) => ({ '@type': 'OpenUri', name: action.label, targets: [{ os: 'default', uri: action.url }] })) } : {}),
     }
 
     await postWebhookJson(doFetch, config.webhookUrl, payload, 'Teams')
@@ -251,6 +256,7 @@ export function createTransports(options: TransportOptions) {
       { type: 'section', text: { type: 'mrkdwn', text: fallbackText } },
       { type: 'section', fields },
       { type: 'context', elements: [{ type: 'mrkdwn', text: `${notice.atLabel} ${notice.at}` }] },
+      ...(webActions(notice).length > 0 ? [{ type: 'actions', elements: webActions(notice).map((action) => ({ type: 'button', text: { type: 'plain_text', text: clip(action.label, 75) }, url: action.url })) }] : []),
     ]
 
     const payload: Record<string, unknown> = {
@@ -288,7 +294,10 @@ export function createTransports(options: TransportOptions) {
     const res = await serviceFetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: config.chatId.trim().replace(/^#(?=-?\d)/, ''), text, parse_mode: 'HTML', link_preview_options: { is_disabled: true } }),
+      body: JSON.stringify({
+        chat_id: config.chatId.trim().replace(/^#(?=-?\d)/, ''), text, parse_mode: 'HTML', link_preview_options: { is_disabled: true },
+        ...(webActions(notice).length > 0 ? { reply_markup: { inline_keyboard: [webActions(notice).map((action) => ({ text: clip(action.label, 60), url: action.url }))] } } : {}),
+      }),
       signal: AbortSignal.timeout(OUTBOUND_TIMEOUT_MS),
     })
     await failOnHttpError(res, 'Telegram', (j) => typeof j['description'] === 'string' ? j['description'] : '')
@@ -318,7 +327,8 @@ export function createTransports(options: TransportOptions) {
     const res = await (customServer ? doFetch : serviceFetch)(target.href, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-      body: JSON.stringify({ topic: config.topic.trim(), title, message: clipBytes(body, NTFY_MAX_MESSAGE_BYTES), priority: NTFY_PRIORITY[notice.severity], tags: [NTFY_TAGS[notice.severity]] }),
+      body: JSON.stringify({ topic: config.topic.trim(), title, message: clipBytes(body, NTFY_MAX_MESSAGE_BYTES), priority: NTFY_PRIORITY[notice.severity], tags: [NTFY_TAGS[notice.severity]],
+        ...(webActions(notice).length > 0 ? { actions: webActions(notice).map((action) => ({ action: 'view', label: clip(action.label, 40), url: action.url })) } : {}) }),
       signal: AbortSignal.timeout(OUTBOUND_TIMEOUT_MS),
       redirect: 'error',
     })
