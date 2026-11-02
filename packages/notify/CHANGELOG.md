@@ -1,5 +1,11 @@
 # @better-forge/notify
 
+## 0.3.0
+
+### Minor Changes
+
+- 9c6857f: Add a `serviceFetch` option to `createTransports`: it sends the requests to the fixed hosts of Telegram, Pushover, Twilio and ntfy.sh, so a product can route them through an outbound proxy.
+
 ## 0.2.0
 
 ### Minor Changes

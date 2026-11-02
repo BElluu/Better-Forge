@@ -1,6 +1,6 @@
 {
   "name": "@better-forge/notify",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Notification channels, delivery history, retries and alert hygiene.",
   "license": "MIT",
   "repository": {
