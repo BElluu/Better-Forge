@@ -151,6 +151,16 @@ describe('transports', () => {
     assert.match(urls[0] ?? '', /hooks\.example\.com\/a/)
   })
 
+  it('sends the requests to the fixed hosts with the service fetch', async () => {
+    const urls: string[] = []
+    const serviceFetch = (async (url: string) => { urls.push(url); return new Response(null, { status: 200 }) }) as unknown as typeof fetch
+    const send = createTransports({ resolveSecret: async () => ({}), sendMail: async () => {}, discordAvatarUrl: 'https://example.com/avatar.png', serviceFetch })
+    await send.deliver({ type: 'ntfy', config: JSON.stringify({ topic: 'alerts' }) }, {}, notice)
+    await send.deliver({ type: 'pushover', config: JSON.stringify({ userKey: 'u', appToken: 't' }) }, {}, notice)
+    assert.match(urls[0] ?? '', /ntfy\.sh/)
+    assert.equal(urls.length, 2)
+  })
+
   it('fails the delivery with the reason of a fetch that refuses the address', async () => {
     const refuse = (async () => { throw new Error('Refusing to connect to 169.254.169.254') }) as unknown as typeof fetch
     await assert.rejects(
