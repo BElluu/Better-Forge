@@ -92,7 +92,8 @@ export function SingleSignOnModal({ onClose, sections = [] }: { onClose: () => v
 
   if (!data || !form) {
     return <ModalShell align="top" onClose={onClose} label={uiText('Single sign-on')}>
-      <div className="rounded-2xl p-6 w-full max-w-2xl" style={CARD}>
+      {/* As wide as the dialog, and not the same element, so it neither jumps nor animates into it. */}
+      <div key="loading" className="rounded-2xl my-8 p-6" style={{ ...CARD, width: 'min(1024px, calc(100vw - 32px))' }}>
         {loadError ? <ErrorState message={loadError} onRetry={() => void load()} /> : <LoadingState label={uiText('Loading sign-in settings…')} />}
         {loadError && <button type="button" className="btn btn-secondary mt-4" onClick={onClose}>{uiText('Close')}</button>}
       </div>
@@ -157,6 +158,7 @@ export function SingleSignOnModal({ onClose, sections = [] }: { onClose: () => v
 
   return <ModalShell align="top" onClose={busy ? undefined : onClose} label={uiText('Single sign-on')}>
     <div
+      key="dialog"
       className="rounded-2xl my-8 flex flex-col lg:flex-row"
       style={{
         width: active ? 'min(1024px, calc(100vw - 32px))' : 'min(604px, calc(100vw - 32px))',
