@@ -5,7 +5,7 @@ import { ConfirmIdentityModal } from '../components/ConfirmIdentityModal'
 import { ConfirmModal } from '../components/ConfirmModal'
 import { CopyButton } from '../components/CopyButton'
 import { ResetTwoFactorModal } from '../components/ResetTwoFactorModal'
-import { SingleSignOnModal, type SsoSection } from '../components/SingleSignOnModal'
+import { SingleSignOnModal, type SsoSectionEntry } from '../components/SingleSignOnModal'
 import { useSsoConfirmation } from '../components/SsoConfirmation'
 import { Alert, EmptyStateLink, EmptyTableRow, ErrorState, LoadingState, PageContainer, PageHeader, useToast, DataTable, DataTh, useTableSort } from '../components/ui'
 import { formatDate } from '../lib/dateFormat'
@@ -33,8 +33,8 @@ export interface UsersPageProps {
   /** The role a new user starts with. */
   defaultRole: string
   actions?: readonly UsersPageAction[]
-  /** The application's own part of the Single sign-on dialog (say, who gets an account on a first sign-in), saved with it. */
-  ssoSection?: SsoSection
+  /** The application's own sections of the Single sign-on dialog (say, who gets an account on a first sign-in), saved with it. The first one opens first. */
+  ssoSections?: readonly SsoSectionEntry[]
 }
 
 function errorMessage(err: unknown, fallback: string) {
@@ -43,7 +43,7 @@ function errorMessage(err: unknown, fallback: string) {
 
 const ROW_ACTION = 'w-8 h-8 flex items-center justify-center rounded-lg transition-colors text-xs focus-ring'
 
-export default function UsersPage({ roles: ROLES, roleRank: ROLE_RANK, defaultRole, actions = [], ssoSection }: UsersPageProps) {
+export default function UsersPage({ roles: ROLES, roleRank: ROLE_RANK, defaultRole, actions = [], ssoSections }: UsersPageProps) {
   const roleLabel = (role: string) => ROLES.find((r) => r.value === role)?.label ?? role
   const qc = useQueryClient()
   const ssoConfirmation = useSsoConfirmation()
@@ -173,7 +173,7 @@ export default function UsersPage({ roles: ROLES, roleRank: ROLE_RANK, defaultRo
         }
       />
 
-      {showSso && <SingleSignOnModal onClose={() => setShowSso(false)} {...(ssoSection ? { section: ssoSection } : {})} />}
+      {showSso && <SingleSignOnModal onClose={() => setShowSso(false)} {...(ssoSections ? { sections: ssoSections } : {})} />}
       {openAction !== null && actions[openAction]?.dialog(() => setOpenAction(null))}
 
       {message && (
