@@ -239,7 +239,7 @@ export function createSignInRoutes(ctx: AuthOptions, parts: {
       }
       try {
         const exchanged = await exchangeOidcCode(cfg, callbackUrlFor(cfg, query), flow)
-        const decision: OidcDecision = exchanged.denial ? { user: null, denial: exchanged.denial } : await evaluateOidcClaims(cfg, exchanged.claims)
+        const decision: OidcDecision = exchanged.denial ? { user: null, denial: exchanged.denial } : await evaluateOidcClaims(cfg, exchanged.claims, flow.returnTo)
         let user: typeof users.$inferSelect
         if (decision.user) {
           user = decision.user

@@ -4,7 +4,6 @@ import * as client from 'openid-client'
 import { and, eq, sql } from 'drizzle-orm'
 import { users } from './tables.js'
 import type { AuthOptions } from './context.js'
-import { ADMIN_ROLE } from './roles.js'
 import type { OidcConfig } from './oidcConfig.js'
 import type { SignInAudit } from './signInAudit.js'
 
@@ -84,6 +83,8 @@ export interface OidcTestResult {
   /** `provision`: the sign-in would create an account. */
   outcome: 'sign_in' | 'link' | 'provision' | 'deny'
   user: string | null
+  /** The role the account would be created with, for `provision`. The test runs as a sign-in without a `returnTo` target. */
+  role?: string | undefined
   denial: OidcDenial | null
 }
 
@@ -166,7 +167,7 @@ export function createOidc(ctx: AuthOptions, signInAudit: SignInAudit) {
    * user wins; otherwise the verified email is matched, but never onto a user bound to another identity at
    * the same provider, so an email address given to someone else cannot take over the account.
    */
-  async function evaluateOidcClaims(cfg: OidcConfig, claims: Record<string, unknown>): Promise<OidcDecision> {
+  async function evaluateOidcClaims(cfg: OidcConfig, claims: Record<string, unknown>, returnTo?: string): Promise<OidcDecision> {
     const subject = typeof claims['sub'] === 'string' ? claims['sub'] : ''
     if (subject) {
       const bound = (await db.select().from(users)
@@ -188,9 +189,9 @@ export function createOidc(ctx: AuthOptions, signInAudit: SignInAudit) {
     if (unverified) return { user: null, denial: { code: 'email_not_verified', reason: unverified, email } }
     const user = (await db.select().from(users).where(sql`lower(${users.email}) = ${email}`))[0]
     if (!user) {
-      const resolved = subject ? await hooks.resolveUnknownSsoUser?.({ email, subject, issuer: cfg.issuer }) : null
-      // A role the application did not register, or admin, is never handed out by a sign-in: no account is created.
-      const provision = subject && resolved && ctx.roles.isValid(resolved.role) && resolved.role !== ADMIN_ROLE ? { email, subject, role: resolved.role } : undefined
+      const resolved = subject ? await hooks.resolveUnknownSsoUser?.({ email, subject, issuer: cfg.issuer, claims, returnTo }) : null
+      // A role the application did not register is never handed out by a sign-in: no account is created.
+      const provision = subject && resolved && ctx.roles.isValid(resolved.role) ? { email, subject, role: resolved.role } : undefined
       return { user: null, denial: { code: 'no_matching_account', reason: `No user has the email ${email}. Create the user first.`, email }, provision }
     }
     if (user.oidcSubject && user.oidcIssuer === cfg.issuer) {
@@ -283,7 +284,7 @@ export function createOidc(ctx: AuthOptions, signInAudit: SignInAudit) {
       .catch((error: unknown) => ({ claims: undefined, denial: describeExchangeError(error) }))
     if (exchanged.denial) return { ...base, claims: null, outcome: 'deny', user: null, denial: exchanged.denial }
     const decision = await evaluateOidcClaims(cfg, exchanged.claims)
-    if (decision.provision) return { ...base, claims: exchanged.claims, outcome: 'provision', user: decision.provision.email, denial: null }
+    if (decision.provision) return { ...base, claims: exchanged.claims, outcome: 'provision', user: decision.provision.email, role: decision.provision.role, denial: null }
     if (decision.denial) return { ...base, claims: exchanged.claims, outcome: 'deny', user: null, denial: decision.denial }
     return { ...base, claims: exchanged.claims, outcome: decision.link ? 'link' : 'sign_in', user: decision.user.email, denial: null }
   }

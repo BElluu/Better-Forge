@@ -17,6 +17,13 @@ export interface UnknownSsoUser {
   email: string
   subject: string
   issuer: string
+  /** The validated ID token claims, for mapping groups or other claims to a role. */
+  claims: Record<string, unknown>
+  /**
+   * The `returnTo` target the sign-in started with (one of `returnTargets`), or undefined for the default sign-in page.
+   * The browser chooses it when the sign-in starts, so it says which path the person took, never how far to trust them.
+   */
+  returnTo?: string | undefined
 }
 
 export type SignInOutcome = { role: string } | { error: string } | 'two-factor'
@@ -27,7 +34,10 @@ export interface AuthHooks {
   /**
    * An SSO sign-in succeeded at the provider but no account matches. Return the role of an account to create for
    * this person, or null to refuse. Only called when the provider's identity is verified; without this hook nobody
-   * is created.
+   * is created. Any registered role may be returned, `admin` included: the application is responsible for how it
+   * decides (an allow-list of email domains, a group mapping, ...), and
+   * never by returning `roles.defaultForNewUsers` unchecked, which is `admin` unless the application registered roles.
+   * The role is fixed at the first sign-in; later sign-ins do not change it. Not called for confirmations.
    */
   resolveUnknownSsoUser?: (user: UnknownSsoUser) => Promise<{ role: string } | null>
   /**
