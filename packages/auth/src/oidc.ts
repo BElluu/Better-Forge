@@ -99,7 +99,10 @@ export function createOidc(ctx: AuthOptions, signInAudit: SignInAudit) {
   function runDiscovery(cfg: OidcConfig): Promise<client.Configuration> {
     const issuer = new URL(cfg.issuer)
     // The client library refuses plain http; allow it only for issuers configured that way (e.g. a local Keycloak).
-    const options = issuer.protocol === 'http:' ? { execute: [client.allowInsecureRequests] } : undefined
+    const options: client.DiscoveryRequestOptions = {}
+    if (issuer.protocol === 'http:') options.execute = [client.allowInsecureRequests]
+    // Discovery hands the function on to the configuration, so the token exchange and key requests use it too.
+    if (ctx.fetch) options[client.customFetch] = ctx.fetch as client.CustomFetch
     return client.discovery(issuer, cfg.clientId, cfg.clientSecret || undefined, undefined, options)
   }
 

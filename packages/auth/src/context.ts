@@ -81,5 +81,7 @@ export interface AuthOptions {
   rateLimits: { signIn: RateLimitConfig; sensitiveAction: RateLimitConfig }
   /** `returnTo` values a sign-in may start with; the application's `signInRedirect` hook turns them into a destination. */
   returnTargets?: readonly string[]
+  /** Sends the requests to the SSO provider (discovery, token exchange, keys), so a product can route them through an outbound proxy. Defaults to the platform's `fetch`. */
+  fetch?: typeof fetch
   hooks?: AuthHooks
 }
