@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, type ComponentType } from 'react'
 import { api } from '../api/client'
 import { uiConfig } from '../config'
 import { Alert, ErrorState, Field, LoadingState, Switch, useToast } from './ui'
@@ -23,7 +23,25 @@ interface Message { tone: 'success' | 'error'; text: string }
 const errorText = (e: unknown) => e instanceof Error ? e.message : String(e)
 const CARD = { background: 'var(--m3-surface-container-lowest)', border: '1px solid var(--m3-outline-variant)', color: 'var(--m3-on-surface)' }
 
-export function SingleSignOnModal({ onClose }: { onClose: () => void }) {
+/** What saving a product's section of the modal does. */
+export interface SsoSectionSave {
+  /** Why the section cannot be saved as it stands. Checked before anything is saved, so the modal never saves only a part. */
+  problem?: string | undefined
+  /** Saves the section. `currentPassword` is set unless the session is an SSO one, whose confirmation the modal handles. */
+  save(currentPassword: string | undefined): Promise<void>
+}
+
+export interface SsoSectionProps {
+  /** Tells the modal what saving the section does, or null when nothing changed. Call it whenever the section's state changes. */
+  onChange(save: SsoSectionSave | null): void
+}
+
+/** A section of the application's own below the provider settings; the modal's one Save button saves it too. */
+export type SsoSection = ComponentType<SsoSectionProps>
+
+export function SingleSignOnModal({ onClose, section: Section }: { onClose: () => void; section?: SsoSection }) {
+  const sectionSave = useRef<SsoSectionSave | null>(null)
+  const onSectionChange = useCallback((save: SsoSectionSave | null) => { sectionSave.current = save }, [])
   const [data, setData] = useState<OidcResponse | null>(null)
   const [form, setForm] = useState<OidcSettings | null>(null)
   const [clientSecret, setClientSecret] = useState('')
@@ -63,13 +81,28 @@ export function SingleSignOnModal({ onClose }: { onClose: () => void }) {
 
   async function save() {
     setBusy('save'); setMessage(null)
+    const extra = sectionSave.current
+    if (extra?.problem) { setMessage({ tone: 'error', text: extra.problem }); setBusy(null); return }
+    const password = sso ? undefined : currentPassword
+    let providerSaved = null as OidcSettings | null
+    let extraSaved = false
     try {
-      const saved = await confirmation.run(() => api.put<OidcSettings>('/admin/oidc', {
-        ...form, clientSecret, ...(sso ? {} : { currentPassword }),
-      }))
-      toast.success(saved.enabled ? 'Single sign-on settings saved. They apply immediately.' : 'Single sign-on settings saved.')
+      // A repeat after the identity provider confirmed the session skips what was already saved.
+      await confirmation.run(async () => {
+        if (!locked && !providerSaved) {
+          providerSaved = await api.put<OidcSettings>('/admin/oidc', { ...form, clientSecret, ...(password === undefined ? {} : { currentPassword: password }) })
+        }
+        if (extra && !extraSaved) { await extra.save(password); extraSaved = true }
+      })
+      toast.success(providerSaved?.enabled ? 'Single sign-on settings saved. They apply immediately.' : 'Single sign-on settings saved.')
       onClose()
-    } catch (err) { setMessage({ tone: 'error', text: errorText(err) }); setBusy(null) }
+    } catch (err) {
+      // Part of it may be saved: show the stored state, not the draft.
+      if (providerSaved) { setClientSecret(''); void load() }
+      const text = errorText(err)
+      setMessage({ tone: 'error', text: providerSaved ? `The sign-in settings were saved, the rest was not. ${text}` : text })
+      setBusy(null)
+    }
   }
 
   return <ModalShell align="top" onClose={busy ? undefined : onClose} label={uiText('Single sign-on')}>
@@ -126,7 +159,9 @@ export function SingleSignOnModal({ onClose }: { onClose: () => void }) {
         </label>
       </fieldset>
 
-      {!locked && <>
+      {Section && <Section onChange={onSectionChange} />}
+
+      {(!locked || Section) && <>
         {sso
           ? <SsoConfirmationNote confirmation={confirmation} />
           : <Field label={uiText('Your current password')} hint={uiText('Required to change sign-in settings.')}>
@@ -153,8 +188,8 @@ export function SingleSignOnModal({ onClose }: { onClose: () => void }) {
         </button>
       </>}
     >
-      <button type="button" disabled={busy !== null} onClick={onClose} className="btn btn-secondary">{locked ? 'Close' : 'Cancel'}</button>
-      {!locked && <button type="submit" disabled={busy !== null} className="btn btn-primary">{busy === 'save' ? 'Saving…' : 'Save'}</button>}
+      <button type="button" disabled={busy !== null} onClick={onClose} className="btn btn-secondary">{locked && !Section ? 'Close' : 'Cancel'}</button>
+      {(!locked || Section) && <button type="submit" disabled={busy !== null} className="btn btn-primary">{busy === 'save' ? 'Saving…' : 'Save'}</button>}
     </ModalFooter>
     </form>
     </div>

@@ -27,7 +27,7 @@ export { default as SettingsPage } from './pages/Settings'
 export { default as SsoConfirmPage } from './pages/SsoConfirm'
 export { default as SsoTestResultPage } from './pages/SsoTestResult'
 export { ResetTwoFactorModal } from './components/ResetTwoFactorModal'
-export { SingleSignOnModal } from './components/SingleSignOnModal'
+export { SingleSignOnModal, type SsoSection, type SsoSectionProps, type SsoSectionSave } from './components/SingleSignOnModal'
 export {
   ssoConfirmChannel, SsoConfirmationNote, isSsoConfirmationRequired, isSsoSession, useSsoConfirmation, type SsoConfirmationState,
 } from './components/SsoConfirmation'
