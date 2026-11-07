@@ -1,5 +1,11 @@
 # @better-forge/auth
 
+## 0.3.0
+
+### Minor Changes
+
+- dd295c6: Add a `fetch` option to `createAuth`: it sends the requests to the SSO provider (discovery, token exchange, keys), so a product can route them through an outbound proxy.
+
 ## 0.2.0
 
 ### Patch Changes
