@@ -41,6 +41,8 @@ export interface SsoProvisioning {
   email: string
   subject: string
   role: string
+  /** Which rule gave the role, as the application described it. */
+  reason?: string | undefined
 }
 
 /**
@@ -85,6 +87,8 @@ export interface OidcTestResult {
   user: string | null
   /** The role the account would be created with, for `provision`. The test runs as a sign-in without a `returnTo` target. */
   role?: string | undefined
+  /** Which rule gave that role. */
+  reason?: string | undefined
   denial: OidcDenial | null
 }
 
@@ -191,7 +195,7 @@ export function createOidc(ctx: AuthOptions, signInAudit: SignInAudit) {
     if (!user) {
       const resolved = subject ? await hooks.resolveUnknownSsoUser?.({ email, subject, issuer: cfg.issuer, claims, returnTo }) : null
       // A role the application did not register is never handed out by a sign-in: no account is created.
-      const provision = subject && resolved && ctx.roles.isValid(resolved.role) ? { email, subject, role: resolved.role } : undefined
+      const provision = subject && resolved && ctx.roles.isValid(resolved.role) ? { email, subject, role: resolved.role, reason: resolved.reason } : undefined
       return { user: null, denial: { code: 'no_matching_account', reason: `No user has the email ${email}. Create the user first.`, email }, provision }
     }
     if (user.oidcSubject && user.oidcIssuer === cfg.issuer) {
@@ -235,7 +239,7 @@ export function createOidc(ctx: AuthOptions, signInAudit: SignInAudit) {
     await audit.write(
       { userId: user!.id, userEmail: user!.email },
       'create', 'user', user!.id, user!.email,
-      { email: user!.email, role: provision.role, createdBy: 'sso', issuer: cfg.issuer },
+      { email: user!.email, role: provision.role, createdBy: 'sso', issuer: cfg.issuer, ...(provision.reason ? { rule: provision.reason.slice(0, 500) } : {}) },
     )
     return user!
   }
@@ -284,7 +288,7 @@ export function createOidc(ctx: AuthOptions, signInAudit: SignInAudit) {
       .catch((error: unknown) => ({ claims: undefined, denial: describeExchangeError(error) }))
     if (exchanged.denial) return { ...base, claims: null, outcome: 'deny', user: null, denial: exchanged.denial }
     const decision = await evaluateOidcClaims(cfg, exchanged.claims)
-    if (decision.provision) return { ...base, claims: exchanged.claims, outcome: 'provision', user: decision.provision.email, role: decision.provision.role, denial: null }
+    if (decision.provision) return { ...base, claims: exchanged.claims, outcome: 'provision', user: decision.provision.email, role: decision.provision.role, reason: decision.provision.reason, denial: null }
     if (decision.denial) return { ...base, claims: exchanged.claims, outcome: 'deny', user: null, denial: decision.denial }
     return { ...base, claims: exchanged.claims, outcome: decision.link ? 'link' : 'sign_in', user: decision.user.email, denial: null }
   }

@@ -37,9 +37,9 @@ export interface AuthHooks {
    * is created. Any registered role may be returned, `admin` included: the application is responsible for how it
    * decides (an allow-list of email domains, a group mapping, ...), and
    * never by returning `roles.defaultForNewUsers` unchecked, which is `admin` unless the application registered roles.
-   * The role is fixed at the first sign-in; later sign-ins do not change it. Not called for confirmations.
+   * `reason` says which rule gave the role (for example the groups that matched); it is recorded with the account in the audit log and shown by the test sign-in. The role is fixed at the first sign-in; later sign-ins do not change it. Not called for confirmations.
    */
-  resolveUnknownSsoUser?: (user: UnknownSsoUser) => Promise<{ role: string } | null>
+  resolveUnknownSsoUser?: (user: UnknownSsoUser) => Promise<{ role: string; reason?: string | undefined } | null>
   /**
    * Where a sign-in goes next, for one that started with a `returnTo` target the application listed in
    * `returnTargets`, or for a role that belongs somewhere else than `urls.home`. Return undefined for the default.

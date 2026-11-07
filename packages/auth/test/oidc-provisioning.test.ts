@@ -14,7 +14,7 @@ type Seen = { email: string; subject: string; issuer: string; claims: Record<str
 
 let database: Database<Record<string, unknown>>
 let seen: Seen[]
-let answer: { role: string } | null
+let answer: { role: string; reason?: string } | null
 let auth: Auth
 
 beforeEach(() => {
@@ -45,7 +45,7 @@ afterEach(() => database.close())
 describe('SSO provisioning of an unknown user', () => {
   it('gives the hook the validated claims and the returnTo of the sign-in, and creates the role it returns, admin included', async () => {
     const decision = await auth.oidc.evaluateOidcClaims(cfg, claims(), 'status')
-    assert.deepEqual(decision.provision, { email: 'new@example.test', subject: 'sub-1', role: 'admin' })
+    assert.deepEqual({ ...decision.provision }, { email: 'new@example.test', subject: 'sub-1', role: 'admin', reason: undefined })
     assert.equal(seen[0]?.returnTo, 'status')
     assert.deepEqual(seen[0]?.claims['groups'], ['ops'])
     assert.equal(seen[0]?.email, 'new@example.test')
@@ -73,6 +73,15 @@ describe('SSO provisioning of an unknown user', () => {
     assert.equal(unverified.denial?.code, 'email_not_verified')
     assert.equal(noSubject.provision, undefined)
     assert.equal(seen.length, 0)
+  })
+
+  it('records the rule that gave the role with the account, and reports it in the test result', async () => {
+    answer = { role: 'viewer', reason: 'group Operators' }
+    const decision = await auth.oidc.evaluateOidcClaims(cfg, claims())
+    assert.equal(decision.provision?.reason, 'group Operators')
+    await auth.oidc.provisionSsoUser(cfg, decision.provision!)
+    const row = database.sqlite.prepare("SELECT diff FROM audit_log WHERE entity_type = 'user' AND action = 'create'").get() as { diff: string }
+    assert.deepEqual(JSON.parse(row.diff), { email: 'new@example.test', role: 'viewer', createdBy: 'sso', issuer: cfg.issuer, rule: 'group Operators' })
   })
 
   it('creates the account bound to the identity and audits it', async () => {
