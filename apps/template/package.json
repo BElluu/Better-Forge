@@ -17,7 +17,7 @@
     "@better-forge/config-as-code": "^0.2.0",
     "@better-forge/contracts": "^0.2.0",
     "@better-forge/db": "^0.2.0",
-    "@better-forge/notify": "^0.4.0",
+    "@better-forge/notify": "^0.4.1",
     "@better-forge/runtime": "^0.2.0",
     "@better-forge/ui": "^0.4.0",
     "@better-forge/vault": "^0.2.0",

@@ -1,5 +1,11 @@
 # @better-forge/notify
 
+## 0.4.1
+
+### Patch Changes
+
+- 7a9153f: Check a Twilio channel when it is created or changed: `channelConfigError` now calls `twilioConfigError`, so a configuration without a valid Account SID, numbers or auth token is refused with `400` instead of failing at the first delivery.
+
 ## 0.4.0
 
 ### Minor Changes
