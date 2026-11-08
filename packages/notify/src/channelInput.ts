@@ -86,6 +86,7 @@ export function channelConfigError(type: string, config: unknown): string | null
   if (type === 'telegram') return telegramConfigError(config)
   if (type === 'ntfy') return ntfyConfigError(config)
   if (type === 'pushover') return pushoverConfigError(config)
+  if (type === 'twilio') return twilioConfigError(config)
   if (type === 'webhook') {
     const url = asConfig(config)['url']
     if (typeof url === 'string' && placeholderInAuthority(url)) return 'A placeholder cannot be part of the host of the URL'
