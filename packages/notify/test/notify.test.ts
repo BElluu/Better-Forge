@@ -54,6 +54,14 @@ describe('channel input', () => {
     assert.equal(channelConfigError('slack', {}), null)
   })
 
+  it('checks a Twilio channel when it is saved', () => {
+    const ok = { accountSid: 'AC' + 'a'.repeat(32), authToken: 'token', from: '+15551234567', to: '+48123456789' }
+    assert.equal(channelConfigError('twilio', ok), null)
+    assert.match(channelConfigError('twilio', {}) ?? '', /Account SID/)
+    assert.match(channelConfigError('twilio', { ...ok, to: '123' }) ?? '', /international format/)
+    assert.match(channelConfigError('twilio', { ...ok, authToken: '' }) ?? '', /Auth Token/)
+  })
+
   it('refuses a webhook URL with a placeholder in the host', () => {
     assert.match(channelConfigError('webhook', { url: 'https://{{error_message}}/x', method: 'POST' }) ?? '', /host of the URL/)
     assert.equal(channelConfigError('webhook', { url: 'https://corp.test/{{error_message}}', method: 'POST' }), null)
